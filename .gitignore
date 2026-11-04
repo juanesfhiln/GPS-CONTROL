@@ -1,0 +1,21 @@
+# Dependencias de Node
+**/node_modules/
+
+# Compilación
+**/dist/
+
+# Python
+**/venv/
+**/__pycache__/
+*.pyc
+
+# Variables de entorno
+.env
+**/.env
+
+# IDE
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
