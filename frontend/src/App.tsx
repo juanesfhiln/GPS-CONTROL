@@ -1,3 +1,6 @@
+
+import BackendStatus from "./components/BackendStatus";
+
 function App() {
   return (
     <main className="inicio">
@@ -6,6 +9,8 @@ function App() {
       <p>
         Plataforma de monitoreo y gestión de flotas.
       </p>
+
+      <BackendStatus/>
 
       <button>
         Iniciar sesión
