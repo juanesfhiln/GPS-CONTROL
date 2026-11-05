@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from app.db.dependencies import get_db
 from app.schemas.auth import LoginRequest, LoginResponse
 from app.services.auth_service import authenticate_user
+from app.api.dependencies import get_current_user
+from app.models.user import User
 
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
@@ -29,3 +31,15 @@ def login(
         )
 
     return resultado
+
+@router.get("/me")
+def obtener_usuario_actual(
+    usuario: User = Depends(get_current_user)
+):
+    return {
+        "id": usuario.id,
+        "nombre": usuario.nombre,
+        "correo": usuario.correo,
+        "rol": usuario.rol.nombre,
+        "activo": usuario.activo
+    }
