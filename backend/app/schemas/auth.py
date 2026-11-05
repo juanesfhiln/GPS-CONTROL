@@ -1,0 +1,15 @@
+
+from pydantic import BaseModel, EmailStr
+
+
+class LoginRequest(BaseModel):
+    correo: EmailStr
+    password: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    usuario: str
+    correo: str
+    rol: str
