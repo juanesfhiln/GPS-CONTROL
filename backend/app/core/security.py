@@ -18,25 +18,36 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(
     os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 )
+COOKIE_SECURE = os.getenv(
+    "COOKIE_SECURE",
+    "false"
+).lower() == "true"
+
+COOKIE_SAMESITE = os.getenv(
+    "COOKIE_SAMESITE",
+    "lax"
+).lower()
+
+if COOKIE_SAMESITE not in ("lax", "strict", "none"):
+    raise RuntimeError("COOKIE_SAMESITE tiene un valor inválido")
+
+if COOKIE_SAMESITE == "none" and not COOKIE_SECURE:
+    raise RuntimeError("SameSite=None requiere COOKIE_SECURE=true")
 
 if not JWT_SECRET_KEY:
     raise RuntimeError("Falta configurar JWT_SECRET_KEY")
 
-
 # Configuración de contraseñas
 password_hash = PasswordHash.recommended()
 
-
 def hash_password(password: str) -> str:
     return password_hash.hash(password)
-
 
 def verify_password(
     password: str,
     hashed_password: str
 ) -> bool:
     return password_hash.verify(password, hashed_password)
-
 
 # Generación de tokens
 def create_access_token(data: dict) -> str:
@@ -47,7 +58,6 @@ def create_access_token(data: dict) -> str:
     )
 
     datos_token.update({"exp": expiration})
-
     token = jwt.encode(
         datos_token,
         JWT_SECRET_KEY,
@@ -55,7 +65,6 @@ def create_access_token(data: dict) -> str:
     )
 
     return token
-
 
 # Validación de tokens
 def decode_access_token(token: str) -> dict:

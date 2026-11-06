@@ -47,10 +47,17 @@ def obtener_usuario(db: Session, usuario_id: int):
     ).first()
 
 
+
 def actualizar_usuario(db: Session, usuario, datos):
     cambios = datos.model_dump(exclude_unset=True)
 
+    if "nombre" in cambios and cambios["nombre"] is None:
+        raise ValueError("El nombre no puede estar vacío")
+
     if "correo" in cambios:
+        if cambios["correo"] is None:
+            raise ValueError("El correo no puede estar vacío")
+
         existente = db.query(User).filter(
             User.correo == cambios["correo"],
             User.id != usuario.id
@@ -60,6 +67,9 @@ def actualizar_usuario(db: Session, usuario, datos):
             raise ValueError("El correo ya está registrado")
 
     if "rol_id" in cambios:
+        if cambios["rol_id"] is None:
+            raise ValueError("El rol no puede estar vacío")
+
         rol = db.query(Role).filter(
             Role.id == cambios["rol_id"]
         ).first()
@@ -67,19 +77,36 @@ def actualizar_usuario(db: Session, usuario, datos):
         if not rol:
             raise ValueError("El rol seleccionado no existe")
 
+        usuario.rol = rol
+        cambios.pop("rol_id")
+
     for campo, valor in cambios.items():
         setattr(usuario, campo, valor)
 
-    db.commit()
-    db.refresh(usuario)
+    # Revocar sesiones anteriores después de modificar la cuenta.
+    usuario.version_token += 1
 
-    return usuario
+    try:
+        db.commit()
+        db.refresh(usuario)
+        return usuario
+    except Exception:
+        db.rollback()
+        raise
+
+
 
 
 def cambiar_estado_usuario(db: Session, usuario):
     usuario.activo = not usuario.activo
 
-    db.commit()
-    db.refresh(usuario)
+    # Revocar todas las sesiones anteriores.
+    usuario.version_token += 1
 
-    return usuario
+    try:
+        db.commit()
+        db.refresh(usuario)
+        return usuario
+    except Exception:
+        db.rollback()
+        raise

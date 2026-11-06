@@ -1,5 +1,5 @@
 
-from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy import String, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
@@ -36,6 +36,12 @@ class User(Base):
     cambiar_password: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
+        nullable=False
+    )
+
+    version_token: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
         nullable=False
     )
 
