@@ -1,0 +1,151 @@
+import os
+import json
+import asyncio
+import httpx
+
+from dotenv import load_dotenv
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+load_dotenv(BASE_DIR / ".env")
+
+
+class WialonClient:
+
+    def __init__(self):
+        self.api_url = os.getenv("WIALON_API_URL")
+        self.token = os.getenv("WIALON_TOKEN")
+
+        self.session_id = None
+        self._session_lock = asyncio.Lock()
+
+        if not self.api_url or not self.token:
+            raise RuntimeError("Faltan las credenciales de Wialon")
+
+    async def login(self):
+        async with self._session_lock:
+
+            # Evita iniciar sesión si ya existe una sesión.
+            if self.session_id:
+                return True
+
+            params = {
+                "svc": "token/login",
+                "params": json.dumps({
+                    "token": self.token
+                })
+            }
+
+            async with httpx.AsyncClient(timeout=20) as client:
+                response = await client.get(
+                    self.api_url,
+                    params=params
+                )
+                response.raise_for_status()
+                data = response.json()
+
+            if "eid" not in data:
+                raise RuntimeError(
+                    "Wialon no devolvió un identificador de sesión"
+                )
+
+            self.session_id = data["eid"]
+
+            return True
+
+    async def _consultar(self, servicio, parametros):
+        """
+        Ejecuta una consulta en Wialon.
+        Si la sesión expiró, inicia una nueva y reintenta una vez.
+        """
+
+        await self.login()
+
+        for intento in range(2):
+
+            params = {
+                "svc": servicio,
+                "params": json.dumps(parametros),
+                "sid": self.session_id
+            }
+
+            async with httpx.AsyncClient(timeout=20) as client:
+                response = await client.get(
+                    self.api_url,
+                    params=params
+                )
+                response.raise_for_status()
+                data = response.json()
+
+            # Error 1: sesión inválida.
+            if data.get("error") == 1 and intento == 0:
+                sesion_anterior = self.session_id
+
+                await self._renovar_sesion(sesion_anterior)
+                continue
+
+            if "error" in data:
+                raise RuntimeError(
+                    f"Error de Wialon en {servicio}: "
+                    f"código {data['error']}"
+                )
+
+            return data
+
+        raise RuntimeError(
+            "No fue posible recuperar la sesión de Wialon"
+        )
+
+    async def _renovar_sesion(self, sesion_anterior):
+        async with self._session_lock:
+
+            # Otra solicitud pudo renovar la sesión mientras esperábamos.
+            if self.session_id != sesion_anterior:
+                return
+
+            self.session_id = None
+
+            params = {
+                "svc": "token/login",
+                "params": json.dumps({
+                    "token": self.token
+                })
+            }
+
+            async with httpx.AsyncClient(timeout=20) as client:
+                response = await client.get(
+                    self.api_url,
+                    params=params
+                )
+                response.raise_for_status()
+                data = response.json()
+
+            if "eid" not in data:
+                raise RuntimeError(
+                    "Wialon no devolvió un identificador de sesión"
+                )
+
+            self.session_id = data["eid"]
+
+    async def get_units(self):
+
+        request_params = {
+            "spec": {
+                "itemsType": "avl_unit",
+                "propName": "sys_name",
+                "propValueMask": "*",
+                "sortType": "sys_name"
+            },
+            "force": 1,
+            "flags": 1025,
+            "from": 0,
+            "to": 0
+        }
+
+        data = await self._consultar(
+            "core/search_items",
+            request_params
+        )
+
+        return data.get("items", [])
