@@ -1,3 +1,4 @@
+
 import os
 import json
 import asyncio
@@ -19,14 +20,24 @@ class WialonClient:
 
         self.session_id = None
         self._session_lock = asyncio.Lock()
+        self._http_client = None
 
         if not self.api_url or not self.token:
             raise RuntimeError("Faltan las credenciales de Wialon")
 
+    async def iniciar(self):
+        if self._http_client is None or self._http_client.is_closed:
+            self._http_client = httpx.AsyncClient(timeout=20)
+
+    async def cerrar(self):
+        if self._http_client is not None and not self._http_client.is_closed:
+            await self._http_client.aclose()
+
+        self._http_client = None
+
     async def login(self):
         async with self._session_lock:
 
-            # Evita iniciar sesión si ya existe una sesión.
             if self.session_id:
                 return True
 
@@ -37,13 +48,12 @@ class WialonClient:
                 })
             }
 
-            async with httpx.AsyncClient(timeout=20) as client:
-                response = await client.get(
-                    self.api_url,
-                    params=params
-                )
-                response.raise_for_status()
-                data = response.json()
+            response = await self._http_client.get(
+                self.api_url,
+                params=params
+            )
+            response.raise_for_status()
+            data = response.json()
 
             if "eid" not in data:
                 raise RuntimeError(
@@ -55,10 +65,6 @@ class WialonClient:
             return True
 
     async def _consultar(self, servicio, parametros):
-        """
-        Ejecuta una consulta en Wialon.
-        Si la sesión expiró, inicia una nueva y reintenta una vez.
-        """
 
         await self.login()
 
@@ -70,18 +76,15 @@ class WialonClient:
                 "sid": self.session_id
             }
 
-            async with httpx.AsyncClient(timeout=20) as client:
-                response = await client.get(
-                    self.api_url,
-                    params=params
-                )
-                response.raise_for_status()
-                data = response.json()
+            response = await self._http_client.get(
+                self.api_url,
+                params=params
+            )
+            response.raise_for_status()
+            data = response.json()
 
-            # Error 1: sesión inválida.
             if data.get("error") == 1 and intento == 0:
                 sesion_anterior = self.session_id
-
                 await self._renovar_sesion(sesion_anterior)
                 continue
 
@@ -100,7 +103,6 @@ class WialonClient:
     async def _renovar_sesion(self, sesion_anterior):
         async with self._session_lock:
 
-            # Otra solicitud pudo renovar la sesión mientras esperábamos.
             if self.session_id != sesion_anterior:
                 return
 
@@ -113,13 +115,12 @@ class WialonClient:
                 })
             }
 
-            async with httpx.AsyncClient(timeout=20) as client:
-                response = await client.get(
-                    self.api_url,
-                    params=params
-                )
-                response.raise_for_status()
-                data = response.json()
+            response = await self._http_client.get(
+                self.api_url,
+                params=params
+            )
+            response.raise_for_status()
+            data = response.json()
 
             if "eid" not in data:
                 raise RuntimeError(

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
 
 import ChangePasswordForm from "./features/auth/components/ChangePasswordForm";
 import { useAuth } from "./features/auth/context/AuthContext";
@@ -58,16 +59,29 @@ function RutaProtegida() {
   }
 
   return (
-    <main>
-      <h1>Dashboard GPS Control</h1>
+    <main className="dashboard-layout">
+      <header className="dashboard-layout__header">
+        <div>
+          <span className="dashboard-layout__label">
+            GPS CONTROL
+          </span>
 
-      <p>Bienvenido, {usuario?.nombre}</p>
+          <p className="dashboard-layout__welcome">
+            Bienvenido, <strong>{usuario?.nombre}</strong>
+          </p>
+        </div>
 
-      <button onClick={salir}>
-        Cerrar sesión
-      </button>
+        <button
+          className="dashboard-layout__logout"
+          onClick={salir}
+        >
+          Cerrar sesión
+        </button>
+      </header>
 
       {error && <p role="alert">{error}</p>}
+
+      <DashboardPage />
     </main>
   );
 }
