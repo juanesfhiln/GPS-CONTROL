@@ -94,7 +94,10 @@ def test_crear_pasajero_correctamente():
             nombre="Ana Gómez",
             codigo="PAS-002",
             telefono="3001111111",
-            campos_personalizados={"Área": "Sur"},
+            campos_personalizados={
+                "Área": "Sur",
+                "_telefono": "3001111111"
+            },
             call_mode="create"
         )
 
@@ -148,12 +151,12 @@ def test_actualizar_pasajero_conserva_campos_personalizados():
                 "id": 101,
                 "n": "Juan Pérez",
                 "c": "PAS-001",
-                "p": "3001234567",
-                "bu": 0,
                 "jp": {
                     "Área": "Norte",
-                    "Turno": "Mañana"
-                }
+                    "Turno": "Mañana",
+                    "_telefono": "3001234567"
+                },
+                "bu": 0,
             }
         ])
 
@@ -173,8 +176,11 @@ def test_actualizar_pasajero_conserva_campos_personalizados():
 
         assert llamada["campos_personalizados"] == {
             "Área": "Norte",
-            "Turno": "Mañana"
+            "Turno": "Mañana",
+            "_telefono": "3001234567"
         }
+
+        assert llamada["telefono"] == "3001234567"
 
     asyncio.run(ejecutar())
 

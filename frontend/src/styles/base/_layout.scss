@@ -1,0 +1,109 @@
+
+@use "../utilities/variables" as v;
+
+.dashboard-layout {
+    min-height: 100vh;
+    background: v.$fondo;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem 3rem;
+        background: v.$blanco;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    &__label {
+        display: block;
+        color: v.$verde-azulado;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    &__welcome {
+        color: v.$gris;
+        font-size: 1.1rem;
+
+        strong {
+            color: v.$negro;
+        }
+    }
+
+    &__logout {
+        padding: 0.7rem 1.2rem;
+        border: none;
+        border-radius: v.$radio-sm;
+        background: v.$rojo;
+        color: v.$blanco;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+            opacity: 0.85;
+        }
+    }
+
+    &__nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 3rem;
+        background: v.$blanco;
+        border-bottom: 1px solid #e5e5e5;
+
+        a {
+            padding: 0.7rem 1.2rem;
+            border-radius: v.$radio-sm;
+            color: v.$gris;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s ease, color 0.2s ease;
+
+            &:hover {
+                background: v.$fondo;
+                color: v.$negro;
+            }
+
+            &.active {
+                background: v.$verde-azulado;
+                color: v.$blanco;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-layout {
+        &__header {
+            padding: 1.2rem;
+        }
+
+        &__nav {
+            padding: 0.7rem 1rem;
+            overflow-x: auto;
+
+            a {
+                white-space: nowrap;
+                padding: 0.65rem 0.9rem;
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-layout {
+        &__header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        &__logout {
+            width: 100%;
+        }
+    }
+}

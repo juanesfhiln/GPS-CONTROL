@@ -33,7 +33,7 @@ class PassengerCreate(BaseModel):
 class PassengerUpdate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     code: str = Field(default="", max_length=50)
-    phone: str = Field(default="", max_length=30)
+    phone: str | None = Field(default=None, max_length=30)
     custom_fields: dict[str, str] | None = None
 
     @field_validator("name")
@@ -45,7 +45,6 @@ class PassengerUpdate(BaseModel):
             raise ValueError("El nombre del pasajero es obligatorio")
 
         return valor
-
 
 class PassengerOperationResponse(BaseModel):
     mensaje: str

@@ -1,0 +1,340 @@
+
+@use "../../../styles/utilities/variables" as v;
+
+.passengers-page {
+    padding: 2rem;
+    min-height: 100%;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+
+        h1 {
+            color: v.$negro;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: v.$gris;
+        }
+
+        button {
+            background: v.$verde-azulado;
+            color: v.$blanco;
+            border: none;
+            border-radius: v.$radio-sm;
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+
+            &:hover {
+                opacity: 0.85;
+            }
+        }
+    }
+}
+
+.passengers-page__search {
+    display: flex;
+    gap: 0.7rem;
+    margin-bottom: 1.5rem;
+
+    input {
+        flex: 1;
+        max-width: 400px;
+        padding: 0.8rem;
+        border: 1px solid #ccc;
+        border-radius: v.$radio-sm;
+        font: inherit;
+
+        &:focus {
+            outline: 2px solid v.$verde-azulado;
+            border-color: transparent;
+        }
+    }
+
+    button {
+        padding: 0.8rem 1.2rem;
+        background: v.$verde-azulado;
+        color: v.$blanco;
+        border: none;
+        border-radius: v.$radio-sm;
+        cursor: pointer;
+        font-weight: 600;
+
+        &:hover {
+            opacity: 0.85;
+        }
+    }
+}
+
+.passengers-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: v.$radio-sm;
+}
+
+.passengers-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: v.$blanco;
+
+    th,
+    td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    th {
+        background: v.$fondo;
+        color: v.$negro;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    tbody tr:hover {
+        background: #f8f8f8;
+    }
+
+    &__actions {
+        white-space: nowrap;
+    }
+
+    button {
+        padding: 0.5rem 0.7rem;
+        margin-right: 0.3rem;
+        border: none;
+        border-radius: v.$radio-sm;
+        cursor: pointer;
+        background: v.$verde-azulado;
+        color: v.$blanco;
+
+        &:hover {
+            opacity: 0.85;
+        }
+
+        &:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    }
+}
+
+.passengers-empty {
+    padding: 1.5rem;
+    color: v.$gris;
+    text-align: center;
+    background: v.$blanco;
+    border-radius: v.$radio-sm;
+}
+
+.passenger-form,
+.passenger-assignment {
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    background: v.$blanco;
+    border-radius: v.$radio-md;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+
+    h2 {
+        margin-bottom: 0.5rem;
+        color: v.$negro;
+    }
+
+    h3 {
+        color: v.$negro;
+    }
+
+    p {
+        color: v.$gris;
+        line-height: 1.5;
+    }
+
+    label {
+        font-weight: 600;
+        color: v.$gris;
+    }
+
+    input,
+    select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: v.$radio-sm;
+        font: inherit;
+
+        &:focus {
+            outline: 2px solid v.$verde-azulado;
+            border-color: transparent;
+        }
+    }
+
+    button {
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: v.$radio-sm;
+        background: v.$verde-azulado;
+        color: v.$blanco;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            opacity: 0.85;
+        }
+
+        &:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+    }
+
+    button[type="button"]:last-child {
+        background: v.$fondo;
+        color: v.$negro;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.7rem;
+        margin-top: 1rem;
+
+        button:first-child {
+            background: v.$fondo;
+            color: v.$negro;
+        }
+
+        button:last-child {
+            background: v.$rojo;
+            color: v.$blanco;
+        }
+    }
+
+    &__custom-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        margin-top: 0.8rem;
+    }
+
+    &__custom-field {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 0.5rem;
+        align-items: center;
+    }
+}
+
+.form-error {
+    color: v.$rojo-oscuro;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+    background: #fce8e8;
+    border-left: 4px solid v.$rojo;
+    border-radius: v.$radio-sm;
+}
+
+.form-success {
+    color: #176b3a;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+    background: #e1f3e9;
+    border-left: 4px solid v.$verde-azulado;
+    border-radius: v.$radio-sm;
+}
+
+.passengers-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+
+    button {
+        padding: 0.6rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: v.$radio-sm;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .passengers-page {
+        padding: 1rem;
+
+        &__header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+
+    .passengers-table {
+        min-width: 750px;
+    }
+}
+
+@media (max-width: 480px) {
+    .passenger-form,
+    .passenger-assignment {
+        padding: 1.3rem;
+    }
+
+    .passenger-form__custom-field {
+        grid-template-columns: 1fr;
+    }
+}
+
+.passengers-page {
+    &__modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+
+    &__error {
+        color: v.$rojo-oscuro;
+        margin-bottom: 1rem;
+        padding: 0.9rem 1rem;
+        background: #fce8e8;
+        border-left: 4px solid v.$rojo;
+        border-radius: v.$radio-sm;
+    }
+
+    &__success {
+        padding: 0.9rem 1rem;
+        margin-bottom: 1rem;
+        background: #e1f3e9;
+        color: #176b3a;
+        border-left: 4px solid v.$verde-azulado;
+        border-radius: v.$radio-sm;
+    }
+
+    &__pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+}

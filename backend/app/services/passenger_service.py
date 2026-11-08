@@ -60,6 +60,24 @@ class PassengerService:
         if not nombre:
             raise ValueError("El nombre del pasajero es obligatorio")
 
+        if not isinstance(campos_personalizados or {}, dict):
+            raise ValueError("Los campos personalizados deben ser un diccionario")
+
+        if "_telefono" in (campos_personalizados or {}):
+            raise ValueError(
+                "La clave _telefono está reservada para uso interno"
+            )
+
+        if any(
+            not isinstance(clave, str)
+            or not clave.strip()
+            or not isinstance(valor, str)
+            for clave, valor in (campos_personalizados or {}).items()
+        ):
+            raise ValueError(
+                "Los campos personalizados deben contener claves y valores de texto válidos"
+            )
+
         pasajeros = await self.obtener_pasajeros()
 
         if codigo and any(
@@ -76,13 +94,18 @@ class PassengerService:
         ):
             raise ValueError("Ya existe un pasajero con ese teléfono")
 
+        campos_finales = dict(campos_personalizados or {})
+
+        if telefono:
+            campos_finales["_telefono"] = telefono
+
         resultado = await self.wialon_client.actualizar_pasajero(
             resource_id=self.resource_id,
             tag_id=0,
             nombre=nombre,
             codigo=codigo,
             telefono=telefono,
-            campos_personalizados=campos_personalizados or {},
+            campos_personalizados=campos_finales,
             call_mode="create"
         )
 
@@ -90,6 +113,7 @@ class PassengerService:
             not isinstance(resultado, list)
             or len(resultado) != 2
             or not isinstance(resultado[0], int)
+            or isinstance(resultado[0], bool)
             or resultado[0] <= 0
             or not isinstance(resultado[1], dict)
         ):
@@ -99,14 +123,12 @@ class PassengerService:
 
         return resultado[0]
 
-
-
     async def actualizar_pasajero(
         self,
         passenger_id: int,
         nombre: str,
         codigo: str = "",
-        telefono: str = "",
+        telefono: str | None = None,
         campos_personalizados: dict[str, str] | None = None
     ):
         if passenger_id <= 0:
@@ -114,7 +136,9 @@ class PassengerService:
 
         nombre = nombre.strip()
         codigo = codigo.strip()
-        telefono = telefono.strip()
+
+        if telefono is not None:
+            telefono = telefono.strip()
 
         if not nombre:
             raise ValueError("El nombre del pasajero es obligatorio")
@@ -122,6 +146,11 @@ class PassengerService:
         if campos_personalizados is not None:
             if not isinstance(campos_personalizados, dict):
                 raise ValueError("Los campos personalizados deben ser un diccionario")
+
+            if "_telefono" in campos_personalizados:
+                raise ValueError(
+                    "La clave _telefono está reservada para uso interno"
+                )
 
             if any(
                 not isinstance(clave, str)
@@ -155,26 +184,37 @@ class PassengerService:
         ):
             raise ValueError("Ya existe otro pasajero con ese código")
 
-        if telefono and any(
+        telefono_final = (
+            pasajero_actual.phone
+            if telefono is None
+            else telefono
+        )
+
+        if telefono_final and any(
             pasajero.id != passenger_id
             and pasajero.phone
-            and pasajero.phone.strip() == telefono
+            and pasajero.phone.strip() == telefono_final
             for pasajero in pasajeros
         ):
             raise ValueError("Ya existe otro pasajero con ese teléfono")
 
-        campos_finales = (
+        campos_finales = dict(
             campos_personalizados
             if campos_personalizados is not None
             else pasajero_actual.custom_fields
         )
+
+        campos_finales.pop("_telefono", None)
+
+        if telefono_final:
+            campos_finales["_telefono"] = telefono_final
 
         resultado = await self.wialon_client.actualizar_pasajero(
             resource_id=self.resource_id,
             tag_id=passenger_id,
             nombre=nombre,
             codigo=codigo,
-            telefono=telefono,
+            telefono=telefono_final,
             campos_personalizados=campos_finales,
             call_mode="update"
         )

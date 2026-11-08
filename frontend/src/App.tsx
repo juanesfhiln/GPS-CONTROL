@@ -1,10 +1,11 @@
 
-import { Navigate, Outlet, Route, Routes } from "react-router";
+import { Navigate, NavLink, Outlet, Route, Routes } from "react-router";
 
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import DriversPage from "./pages/DriversPage";
+import PassengersPage from "./pages/PassengersPage";
 
 import ChangePasswordForm from "./features/auth/components/ChangePasswordForm";
 import { useAuth } from "./features/auth/context/AuthContext";
@@ -58,6 +59,20 @@ function RutaProtegida() {
                 </button>
             </header>
 
+            <nav className="dashboard-layout__nav" aria-label="Navegación principal">
+                <NavLink to="/dashboard">
+                    Dashboard
+                </NavLink>
+
+                <NavLink to="/conductores">
+                    Conductores
+                </NavLink>
+
+                <NavLink to="/pasajeros">
+                    Pasajeros
+                </NavLink>
+            </nav>
+
             <Outlet />
         </main>
     );
@@ -86,6 +101,7 @@ function App() {
             <Route element={<RutaProtegida />}>
                 <Route path="/dashboard" element={<DashboardPage />}/>
                 <Route path="/conductores" element={<DriversPage />} />
+                <Route path="/pasajeros" element={<PassengersPage />} />
             </Route>
 
             <Route

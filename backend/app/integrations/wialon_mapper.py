@@ -163,64 +163,56 @@ def convertir_conductor(datos):
     )
 
 
+
 def convertir_pasajero(datos: dict) -> Passenger:
     if not isinstance(datos, dict):
-        raise ValueError("Los datos del pasajero tienen una estructura inválida")
+        raise ValueError("Los datos del pasajero no son válidos")
 
-    # Obtener campos personalizados.
-    jp = datos.get("jp")
+    jp = datos.get("jp", {})
 
     if jp is None:
         jp = {}
 
     if not isinstance(jp, dict):
-        raise ValueError(
-            "Los campos personalizados del pasajero tienen una estructura inválida"
-        )
+        raise ValueError("Los campos personalizados no son válidos")
 
-    campos_personalizados = {}
+    if not all(
+        isinstance(clave, str) and isinstance(valor, str)
+        for clave, valor in jp.items()
+    ):
+        raise ValueError("Los campos personalizados contienen valores no válidos")
 
-    for clave, valor in jp.items():
-        if not isinstance(clave, str) or not clave.strip():
-            raise ValueError("Se encontró una clave personalizada inválida")
+    campos_personalizados = dict(jp)
 
-        if isinstance(valor, bool):
-            raise ValueError(
-                f"El campo personalizado '{clave}' tiene un valor booleano no admitido"
-            )
+    telefono_interno = campos_personalizados.pop("_telefono", "")
+    telefono = datos.get("p") or telefono_interno or ""
 
-        if not isinstance(valor, (str, int, float)):
-            raise ValueError(
-                f"El campo personalizado '{clave}' tiene un tipo de dato no admitido"
-            )
+    if not isinstance(telefono, str):
+        telefono = ""
 
-        campos_personalizados[clave] = str(valor)
-
-    # Obtener vehículo asignado.
     vehiculo_asignado = datos.get("bu")
 
     if (
-        not isinstance(vehiculo_asignado, int)
-        or isinstance(vehiculo_asignado, bool)
+        isinstance(vehiculo_asignado, bool)
+        or not isinstance(vehiculo_asignado, int)
         or vehiculo_asignado <= 0
     ):
         vehiculo_asignado = None
 
-    # Validar identificador.
     pasajero_id = datos.get("id")
 
     if (
-        not isinstance(pasajero_id, int)
-        or isinstance(pasajero_id, bool)
+        isinstance(pasajero_id, bool)
+        or not isinstance(pasajero_id, int)
         or pasajero_id <= 0
     ):
-        raise ValueError("El identificador del pasajero es inválido")
+        raise ValueError("El ID del pasajero no es válido")
 
     return Passenger(
         id=pasajero_id,
         name=datos.get("n", ""),
         code=datos.get("c", ""),
-        phone=datos.get("p", ""),
+        phone=telefono,
         assigned_unit_id=vehiculo_asignado,
         custom_fields=campos_personalizados
     )
