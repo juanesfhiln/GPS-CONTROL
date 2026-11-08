@@ -4,11 +4,10 @@ from datetime import datetime, timezone
 
 from app.domain.vehicle import Vehicle
 from app.domain.driver import Driver
-
+from app.domain.passenger import Passenger
 
 TIEMPO_SIN_SENAL = 300
 VELOCIDAD_MINIMA = 3
-
 
 def convertir_fecha(timestamp):
     if timestamp is None:
@@ -27,7 +26,6 @@ def convertir_fecha(timestamp):
 
     return fecha
 
-
 def numero_valido(valor):
     try:
         numero = float(valor)
@@ -39,7 +37,6 @@ def numero_valido(valor):
 
     except (TypeError, ValueError):
         return None
-
 
 def obtener_rumbo_cardinal(rumbo):
     if rumbo is None:
@@ -59,7 +56,6 @@ def obtener_rumbo_cardinal(rumbo):
     indice = int((rumbo + 22.5) // 45) % 8
 
     return direcciones[indice]
-
 
 def obtener_estado(velocidad, ultima_fecha, fecha_posicion):
     if ultima_fecha is None or fecha_posicion is None:
@@ -85,7 +81,6 @@ def obtener_estado(velocidad, ultima_fecha, fecha_posicion):
         return "en_movimiento"
 
     return "detenido"
-
 
 def convertir_vehiculo(datos):
     posicion = datos.get("pos") or {}
@@ -163,6 +158,69 @@ def convertir_conductor(datos):
         code=datos.get("c"),
         phone=datos.get("p"),
         description=datos.get("ds"),
+        assigned_unit_id=vehiculo_asignado,
+        custom_fields=campos_personalizados
+    )
+
+
+def convertir_pasajero(datos: dict) -> Passenger:
+    if not isinstance(datos, dict):
+        raise ValueError("Los datos del pasajero tienen una estructura inválida")
+
+    # Obtener campos personalizados.
+    jp = datos.get("jp")
+
+    if jp is None:
+        jp = {}
+
+    if not isinstance(jp, dict):
+        raise ValueError(
+            "Los campos personalizados del pasajero tienen una estructura inválida"
+        )
+
+    campos_personalizados = {}
+
+    for clave, valor in jp.items():
+        if not isinstance(clave, str) or not clave.strip():
+            raise ValueError("Se encontró una clave personalizada inválida")
+
+        if isinstance(valor, bool):
+            raise ValueError(
+                f"El campo personalizado '{clave}' tiene un valor booleano no admitido"
+            )
+
+        if not isinstance(valor, (str, int, float)):
+            raise ValueError(
+                f"El campo personalizado '{clave}' tiene un tipo de dato no admitido"
+            )
+
+        campos_personalizados[clave] = str(valor)
+
+    # Obtener vehículo asignado.
+    vehiculo_asignado = datos.get("bu")
+
+    if (
+        not isinstance(vehiculo_asignado, int)
+        or isinstance(vehiculo_asignado, bool)
+        or vehiculo_asignado <= 0
+    ):
+        vehiculo_asignado = None
+
+    # Validar identificador.
+    pasajero_id = datos.get("id")
+
+    if (
+        not isinstance(pasajero_id, int)
+        or isinstance(pasajero_id, bool)
+        or pasajero_id <= 0
+    ):
+        raise ValueError("El identificador del pasajero es inválido")
+
+    return Passenger(
+        id=pasajero_id,
+        name=datos.get("n", ""),
+        code=datos.get("c", ""),
+        phone=datos.get("p", ""),
         assigned_unit_id=vehiculo_asignado,
         custom_fields=campos_personalizados
     )

@@ -321,3 +321,133 @@ class WialonClient:
             "resource/update_driver",
             params
         )
+
+    async def actualizar_pasajero(
+        self,
+        resource_id: int,
+        tag_id: int,
+        nombre: str = "",
+        codigo: str = "",
+        telefono: str = "",
+        campos_personalizados: dict[str, str] | None = None,
+        call_mode: str = "create"
+    ):
+        if resource_id <= 0:
+            raise ValueError("El ID del recurso no es válido")
+
+        if call_mode not in ("create", "update", "delete"):
+            raise ValueError("La operación del pasajero no es válida")
+
+        if call_mode == "delete":
+            if tag_id <= 0:
+                raise ValueError("El ID del pasajero no es válido")
+
+        else:
+            nombre = nombre.strip()
+            codigo = codigo.strip()
+            telefono = telefono.strip()
+
+            if not nombre:
+                raise ValueError("El nombre del pasajero es obligatorio")
+
+            if call_mode == "update" and tag_id <= 0:
+                raise ValueError("El ID del pasajero no es válido")
+
+            if call_mode == "create" and tag_id != 0:
+                raise ValueError("Para crear un pasajero, el ID debe ser 0")
+
+            if campos_personalizados is None:
+                raise ValueError(
+                    "Debes proporcionar los campos personalizados"
+                )
+
+            if not isinstance(campos_personalizados, dict):
+                raise ValueError(
+                    "Los campos personalizados deben ser un diccionario"
+                )
+
+            if any(
+                not isinstance(clave, str)
+                or not clave.strip()
+                or not isinstance(valor, str)
+                for clave, valor in campos_personalizados.items()
+            ):
+                raise ValueError(
+                    "Los campos personalizados deben contener claves y valores de texto válidos"
+                )
+
+        params = {
+            "itemId": resource_id,
+            "id": tag_id,
+            "callMode": call_mode
+        }
+
+        if call_mode != "delete":
+            params.update({
+                "n": nombre,
+                "c": codigo,
+                "p": telefono,
+                "tz": 0,
+                "jp": campos_personalizados
+            })
+
+        return await self._consultar(
+            "resource/update_tag",
+            params
+        )
+
+    async def vincular_pasajero(
+        self,
+        resource_id: int,
+        unit_id: int,
+        tag_id: int,
+        asignar: bool = True
+    ):
+        if resource_id <= 0:
+            raise ValueError("El ID del recurso no es válido")
+
+        if unit_id <= 0:
+            raise ValueError("El ID del vehículo no es válido")
+
+        if tag_id <= 0:
+            raise ValueError("El ID del pasajero no es válido")
+
+        params = {
+            "resourceId": resource_id,
+            "unitId": unit_id,
+            "tagId": tag_id,
+            "time": 0,
+            "mode": asignar
+        }
+
+        return await self._consultar(
+            "resource/bind_unit_tag",
+            params
+        )
+
+    async def get_tag_bindings(
+        self,
+        resource_id: int,
+        time_from: int,
+        time_to: int,
+        unit_id: int = 0,
+        tag_id: int = 0
+    ):
+        if resource_id <= 0:
+            raise ValueError("El ID del recurso no es válido")
+
+        if time_from < 0 or time_to <= time_from:
+            raise ValueError("El intervalo de tiempo no es válido")
+
+        params = {
+            "resourceId": resource_id,
+            "unitId": unit_id,
+            "tagId": tag_id,
+            "timeFrom": time_from,
+            "timeTo": time_to
+        }
+
+        return await self._consultar(
+            "resource/get_tag_bindings",
+            params
+        )
