@@ -83,16 +83,18 @@ class WialonClient:
             response.raise_for_status()
             data = response.json()
 
-            if data.get("error") == 1 and intento == 0:
-                sesion_anterior = self.session_id
-                await self._renovar_sesion(sesion_anterior)
-                continue
+            if isinstance(data, dict):
 
-            if "error" in data:
-                raise RuntimeError(
-                    f"Error de Wialon en {servicio}: "
-                    f"código {data['error']}"
-                )
+                if data.get("error") == 1 and intento == 0:
+                    sesion_anterior = self.session_id
+                    await self._renovar_sesion(sesion_anterior)
+                    continue
+
+                if "error" in data:
+                    raise RuntimeError(
+                        f"Error de Wialon en {servicio}: "
+                        f"código {data['error']}"
+                    )
 
             return data
 
@@ -150,3 +152,172 @@ class WialonClient:
         )
 
         return data.get("items", [])
+
+    async def get_resources(self):
+        request_params = {
+            "spec": {
+                "itemsType": "avl_resource",
+                "propName": "sys_name",
+                "propValueMask": "*",
+                "sortType": "sys_name"
+            },
+            "force": 1,
+            "flags": 2097409,
+            "from": 0,
+            "to": 0
+        }
+
+        data = await self._consultar(
+            "core/search_items",
+            request_params
+        )
+
+        return data.get("items", [])
+
+    async def get_unit_drivers(self, unit_id: int):
+        if unit_id <= 0:
+            raise ValueError("El ID del vehículo no es válido")
+
+        params = {
+            "unitId": unit_id
+        }
+
+        return await self._consultar(
+            "resource/get_unit_drivers",
+            params
+        )
+
+    async def get_driver_bindings(
+        self,
+        resource_id: int,
+        time_from: int,
+        time_to: int,
+        unit_id: int = 0,
+        driver_id: int = 0
+    ):
+        if resource_id <= 0:
+            raise ValueError("El ID del recurso no es válido")
+
+        if time_from < 0 or time_to <= time_from:
+            raise ValueError("El intervalo de tiempo no es válido")
+
+        params = {
+            "resourceId": resource_id,
+            "unitId": unit_id,
+            "driverId": driver_id,
+            "timeFrom": time_from,
+            "timeTo": time_to
+        }
+
+        return await self._consultar(
+            "resource/get_driver_bindings",
+            params
+        )
+
+    async def bind_unit_driver(
+        self,
+        resource_id: int,
+        unit_id: int,
+        driver_id: int,
+        asignar: bool = True
+    ):
+        if resource_id <= 0:
+            raise ValueError("El ID del recurso no es válido")
+
+        if unit_id <= 0:
+            raise ValueError("El ID del vehículo no es válido")
+
+        if driver_id <= 0:
+            raise ValueError("El ID del conductor no es válido")
+
+        params = {
+            "resourceId": resource_id,
+            "unitId": unit_id,
+            "driverId": driver_id,
+            "time": 0,
+            "mode": asignar
+        }
+
+        return await self._consultar(
+            "resource/bind_unit_driver",
+            params
+        )
+
+    async def crear_conductor(
+        self,
+        resource_id: int,
+        nombre: str,
+        codigo: str = "",
+        telefono: str = "",
+        descripcion: str = ""
+    ):
+        nombre = nombre.strip()
+
+        if not nombre:
+            raise ValueError("El nombre del conductor es obligatorio")
+
+        params = {
+            "itemId": resource_id,
+            "id": 0,
+            "callMode": "create",
+            "n": nombre,
+            "c": codigo.strip(),
+            "p": telefono.strip(),
+            "ds": descripcion.strip(),
+            "pwd": ""
+        }
+
+        return await self._consultar(
+            "resource/update_driver",
+            params
+        )
+
+    async def actualizar_conductor(
+        self,
+        resource_id: int,
+        driver_id: int,
+        nombre: str,
+        codigo: str = "",
+        telefono: str = "",
+        descripcion: str = "",
+        campos_personalizados: dict[str, str] | None = None
+    ):
+        nombre = nombre.strip()
+
+        if not nombre:
+            raise ValueError("El nombre del conductor es obligatorio")
+
+        params = {
+            "itemId": resource_id,
+            "id": driver_id,
+            "callMode": "update",
+            "n": nombre,
+            "c": codigo.strip(),
+            "p": telefono.strip(),
+            "ds": descripcion.strip(),
+            "jp": campos_personalizados or {}
+        }
+
+        return await self._consultar(
+            "resource/update_driver",
+            params
+        )
+
+    async def eliminar_conductor(
+        self,
+        resource_id: int,
+        driver_id: int
+    ):
+        if driver_id <= 0:
+            raise ValueError("El ID del conductor no es válido")
+
+        params = {
+            "itemId": resource_id,
+            "id": driver_id,
+            "callMode": "delete"
+        }
+
+        return await self._consultar(
+            "resource/update_driver",
+            params
+        )

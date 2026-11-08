@@ -3,6 +3,7 @@ import math
 from datetime import datetime, timezone
 
 from app.domain.vehicle import Vehicle
+from app.domain.driver import Driver
 
 
 TIEMPO_SIN_SENAL = 300
@@ -140,4 +141,28 @@ def convertir_vehiculo(datos):
         position_time=fecha_posicion,
         last_message_time=fecha_mensaje,
         status=estado
+    )
+
+def convertir_conductor(datos):
+    campos_personalizados = datos.get("jp") or {}
+
+    campos_personalizados = {
+        str(clave): valor
+        for clave, valor in campos_personalizados.items()
+        if isinstance(valor, str)
+    }
+
+    vehiculo_asignado = datos.get("bu")
+
+    if not isinstance(vehiculo_asignado, int) or vehiculo_asignado == 0:
+        vehiculo_asignado = None
+
+    return Driver(
+        id=int(datos["id"]),
+        name=datos.get("n") or "Sin nombre",
+        code=datos.get("c"),
+        phone=datos.get("p"),
+        description=datos.get("ds"),
+        assigned_unit_id=vehiculo_asignado,
+        custom_fields=campos_personalizados
     )
