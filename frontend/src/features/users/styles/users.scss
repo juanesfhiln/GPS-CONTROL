@@ -1,0 +1,354 @@
+
+@use "../../../styles/utilities/variables" as v;
+
+.users-page {
+    padding: 2rem;
+    min-height: 100%;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+
+        h1 {
+            color: v.$negro;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: v.$gris;
+        }
+
+        button {
+            background: v.$verde-azulado;
+            color: v.$blanco;
+            border: none;
+            border-radius: v.$radio-sm;
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+
+            &:hover {
+                opacity: 0.85;
+            }
+        }
+    }
+
+    &__table-container {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: v.$radio-sm;
+    }
+
+    &__loading,
+    &__empty {
+        padding: 1.5rem;
+        color: v.$gris;
+        text-align: center;
+        background: v.$blanco;
+        border-radius: v.$radio-sm;
+    }
+
+    &__error {
+        color: v.$rojo-oscuro;
+        padding: 0.9rem 1rem;
+        margin-bottom: 1rem;
+        background: #fce8e8;
+        border-left: 4px solid v.$rojo;
+        border-radius: v.$radio-sm;
+    }
+
+    &__success {
+        color: #176b3a;
+        padding: 0.9rem 1rem;
+        margin-bottom: 1rem;
+        background: #e1f3e9;
+        border-left: 4px solid v.$verde-azulado;
+        border-radius: v.$radio-sm;
+    }
+
+    &__modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+}
+
+.users-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    background: v.$blanco;
+
+    th,
+    td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    th {
+        background: v.$fondo;
+        color: v.$negro;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    tbody tr:hover {
+        background: #f8f8f8;
+    }
+
+    &__status {
+        display: inline-block;
+        padding: 0.35rem 0.65rem;
+        border-radius: v.$radio-sm;
+        font-size: 0.85rem;
+        font-weight: 600;
+
+        &--active {
+            color: #176b3a;
+            background: #e1f3e9;
+        }
+
+        &--inactive {
+            color: v.$rojo-oscuro;
+            background: #fce8e8;
+        }
+    }
+
+    &__actions {
+        white-space: nowrap;
+
+        button {
+            padding: 0.5rem 0.7rem;
+            margin-right: 0.4rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            cursor: pointer;
+            background: v.$verde-azulado;
+            color: v.$blanco;
+
+            &:hover:not(:disabled) {
+                opacity: 0.85;
+            }
+
+            &:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+
+            &:last-child {
+                background: v.$rojo-oscuro;
+            }
+        }
+    }
+}
+
+.user-form {
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+    background: v.$blanco;
+    border-radius: v.$radio-md;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+
+    h2 {
+        margin-bottom: 0.5rem;
+        color: v.$negro;
+    }
+
+    label {
+        font-weight: 600;
+        color: v.$gris;
+    }
+
+    input,
+    select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: v.$radio-sm;
+        font: inherit;
+
+        &:focus {
+            outline: 2px solid v.$verde-azulado;
+            border-color: transparent;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.7rem;
+        margin-top: 1rem;
+
+        button {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            background: v.$verde-azulado;
+            color: v.$blanco;
+            font-weight: 600;
+            cursor: pointer;
+
+            &:first-child {
+                background: v.$fondo;
+                color: v.$negro;
+            }
+
+            &:disabled {
+                opacity: 0.55;
+                cursor: not-allowed;
+            }
+        }
+    }
+}
+
+.users-confirmation {
+    width: 100%;
+    max-width: 430px;
+    padding: 2rem;
+    background: v.$blanco;
+    border-radius: v.$radio-md;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+
+    &__icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: v.$fondo;
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        color: v.$negro;
+        margin-bottom: 0.8rem;
+    }
+
+    p {
+        color: v.$gris;
+        line-height: 1.5;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-top: 1.8rem;
+
+        button {
+            padding: 0.75rem 1.2rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+
+            &:hover:not(:disabled) {
+                opacity: 0.85;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    &__danger {
+        background: v.$rojo-oscuro;
+        color: v.$blanco;
+    }
+
+    &__success {
+        background: v.$verde-azulado;
+        color: v.$blanco;
+    }
+
+    &__password {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: v.$fondo;
+        border-radius: v.$radio-sm;
+
+        code {
+            display: block;
+            padding: 0.8rem;
+            background: v.$blanco;
+            border: 1px solid #ccc;
+            border-radius: v.$radio-sm;
+            overflow-wrap: anywhere;
+            color: v.$negro;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 0.75rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            background: v.$verde-azulado;
+            color: v.$blanco;
+            font-weight: 600;
+            cursor: pointer;
+
+            &:hover:not(:disabled) {
+                opacity: 0.85;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .users-page {
+        padding: 1rem;
+
+        &__header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .user-form {
+        padding: 1.3rem;
+    }
+
+    .users-confirmation {
+        padding: 1.3rem;
+
+        &__actions {
+            flex-direction: column;
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+}

@@ -1,0 +1,237 @@
+
+@use "../../../styles/utilities/variables" as v;
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background:
+        radial-gradient(circle at top left, rgba(v.$verde-azulado, 0.16), transparent 35%),
+        linear-gradient(135deg, #f8f5fa, v.$fondo);
+
+    &__container {
+        width: 100%;
+        max-width: 460px;
+        padding: 3rem;
+        background: v.$blanco;
+        border: 1px solid rgba(107, 107, 107, 0.12);
+        border-radius: v.$radio-lg;
+        box-shadow: 0 18px 55px rgba(34, 34, 34, 0.10);
+
+        h1 {
+            margin-bottom: 0.8rem;
+            color: v.$rojo;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        > p {
+            margin-bottom: 2rem;
+            color: v.$gris;
+            line-height: 1.6;
+        }
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.3rem;
+
+        &-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            color: v.$negro;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1px solid #d8d3dc;
+            border-radius: v.$radio-sm;
+            background: v.$blanco;
+            color: v.$negro;
+            font: inherit;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+            &:focus {
+                outline: none;
+                border-color: v.$verde-azulado;
+                box-shadow: 0 0 0 3px rgba(30, 140, 147, 0.15);
+            }
+
+            &:disabled {
+                background: #f3f1f4;
+                cursor: not-allowed;
+            }
+        }
+
+        button {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.95rem 1rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            background: v.$rojo;
+            color: v.$blanco;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+
+            &:hover:not(:disabled) {
+                background: v.$rojo-oscuro;
+                transform: translateY(-1px);
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+
+        [role="alert"] {
+            padding: 0.85rem;
+            border-left: 4px solid v.$rojo;
+            border-radius: v.$radio-sm;
+            background: #fce8e8;
+            color: v.$rojo-oscuro;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    }
+}
+
+.password-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background:
+        radial-gradient(circle at bottom right, rgba(30, 140, 147, 0.14), transparent 35%),
+        linear-gradient(135deg, #f8f5fa, v.$fondo);
+
+    &__container {
+        width: 100%;
+        max-width: 520px;
+        padding: 2.5rem;
+        background: v.$blanco;
+        border-radius: v.$radio-lg;
+        box-shadow: 0 18px 55px rgba(34, 34, 34, 0.10);
+
+        h1 {
+            margin-bottom: 0.8rem;
+            color: v.$rojo;
+            font-size: 1.8rem;
+        }
+
+        > p {
+            margin-bottom: 1.8rem;
+            color: v.$gris;
+            line-height: 1.6;
+        }
+    }
+
+    &__logout {
+        width: 100%;
+        margin-top: 1rem;
+        padding: 0.8rem;
+        border: 1px solid #d8d3dc;
+        border-radius: v.$radio-sm;
+        background: v.$blanco;
+        color: v.$gris;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover {
+            background: v.$fondo;
+        }
+    }
+}
+
+.change-password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    label {
+        color: v.$negro;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        border: 1px solid #d8d3dc;
+        border-radius: v.$radio-sm;
+        font: inherit;
+
+        &:focus {
+            outline: none;
+            border-color: v.$verde-azulado;
+            box-shadow: 0 0 0 3px rgba(30, 140, 147, 0.15);
+        }
+    }
+
+    button {
+        padding: 0.95rem;
+        border: none;
+        border-radius: v.$radio-sm;
+        background: v.$rojo;
+        color: v.$blanco;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            background: v.$rojo-oscuro;
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    [role="alert"] {
+        padding: 0.85rem;
+        border-left: 4px solid v.$rojo;
+        border-radius: v.$radio-sm;
+        background: #fce8e8;
+        color: v.$rojo-oscuro;
+    }
+
+    [role="status"] {
+        padding: 0.85rem;
+        border-left: 4px solid v.$verde-azulado;
+        border-radius: v.$radio-sm;
+        background: #e4f3f2;
+        color: #176b3a;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-page,
+    .password-page {
+        padding: 1rem;
+
+        &__container {
+            padding: 1.6rem;
+        }
+    }
+}

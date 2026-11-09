@@ -1,5 +1,4 @@
-
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 
 import { useAuth } from "../features/auth/context/AuthContext";
 
@@ -212,7 +211,7 @@ function PassengersPage() {
         }
     }
 
-    function buscarPasajeros(evento: FormEvent<HTMLFormElement>) {
+    function buscarPasajeros(evento: SyntheticEvent<HTMLFormElement>) {
         evento.preventDefault();
         setPagina(1);
         setFiltro(busqueda.trim());

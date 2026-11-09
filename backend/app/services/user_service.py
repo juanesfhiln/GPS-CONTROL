@@ -1,4 +1,4 @@
-
+import secrets
 from sqlalchemy.orm import Session
 
 from app.models.user import User
@@ -94,9 +94,6 @@ def actualizar_usuario(db: Session, usuario, datos):
         db.rollback()
         raise
 
-
-
-
 def cambiar_estado_usuario(db: Session, usuario):
     usuario.activo = not usuario.activo
 
@@ -107,6 +104,23 @@ def cambiar_estado_usuario(db: Session, usuario):
         db.commit()
         db.refresh(usuario)
         return usuario
+    except Exception:
+        db.rollback()
+        raise
+
+def restablecer_password_usuario(db: Session, usuario: User):
+    password_temporal = secrets.token_urlsafe(18)
+
+    usuario.password_hash = hash_password(password_temporal)
+    usuario.cambiar_password = True
+    usuario.version_token += 1
+
+    try:
+        db.commit()
+        db.refresh(usuario)
+
+        return password_temporal
+
     except Exception:
         db.rollback()
         raise

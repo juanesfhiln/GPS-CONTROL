@@ -1,4 +1,3 @@
-
 import type { Driver } from "../types/driver";
 
 interface DriversTableProps {
@@ -19,11 +18,11 @@ function DriversTable({
     onAsignar
 }: DriversTableProps) {
     if (cargando) {
-        return <p>Cargando conductores...</p>;
+        return <p className="drivers-table__message">Cargando conductores...</p>;
     }
 
     if (conductores.length === 0) {
-        return <p>No se encontraron conductores.</p>;
+        return <p className="drivers-table__message">No se encontraron conductores.</p>;
     }
 
     return (
@@ -43,33 +42,22 @@ function DriversTable({
                 <tbody>
                     {conductores.map((conductor) => (
                         <tr key={conductor.id}>
-                            <td>{conductor.id}</td>
-                            <td>{conductor.name}</td>
-                            <td>{conductor.code || "—"}</td>
-                            <td>{conductor.phone || "—"}</td>
-
-                            <td>
+                            <td data-label="ID">{conductor.id}</td>
+                            <td data-label="Nombre">{conductor.name}</td>
+                            <td data-label="Código">{conductor.code || "—"}</td>
+                            <td data-label="Teléfono">{conductor.phone || "—"}</td>
+                            <td data-label="Vehículo asignado">
                                 {conductor.assigned_unit_id ?? "Sin asignar"}
                             </td>
 
                             {puedeGestionar && (
-                                <td className="drivers-table__actions">
-                                    <button
-                                        type="button"
-                                        onClick={() => onEditar(conductor)}
-                                    >
+                                <td className="drivers-table__actions" data-label="Acciones">
+                                    <button type="button" onClick={() => onEditar(conductor)}>
                                         Editar
                                     </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => onAsignar(conductor)}
-                                    >
-                                        {conductor.assigned_unit_id
-                                            ? "Ver asignación"
-                                            : "Asignar"}
+                                    <button type="button" onClick={() => onAsignar(conductor)}>
+                                        {conductor.assigned_unit_id ? "Ver asignación" : "Asignar"}
                                     </button>
-
                                     <button
                                         type="button"
                                         onClick={() => onEliminar(conductor)}

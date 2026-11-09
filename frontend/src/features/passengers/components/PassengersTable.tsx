@@ -36,32 +36,24 @@ function PassengersTable({
                 <tbody>
                     {passengers.map(passenger => (
                         <tr key={passenger.id}>
-                            <td>{passenger.id}</td>
-                            <td>{passenger.name}</td>
-                            <td>{passenger.code || "—"}</td>
-                            <td>{passenger.phone || "—"}</td>
-                            <td>
+                            <td data-label="ID">{passenger.id}</td>
+                            <td data-label="Nombre">{passenger.name}</td>
+                            <td data-label="Código">{passenger.code || "—"}</td>
+                            <td data-label="Teléfono">{passenger.phone || "—"}</td>
+                            <td data-label="Vehículo asignado">
                                 {passenger.assigned_unit_id
                                     ? passenger.assigned_unit_id
                                     : "Sin asignar"}
                             </td>
 
                             {puedeAdministrar && (
-                                <td className="passengers-table__actions">
-                                    <button
-                                        type="button"
-                                        onClick={() => onEdit(passenger)}
-                                    >
+                                <td className="passengers-table__actions" data-label="Acciones">
+                                    <button type="button" onClick={() => onEdit(passenger)}>
                                         Editar
                                     </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => onAssign(passenger)}
-                                    >
+                                    <button type="button" onClick={() => onAssign(passenger)}>
                                         Asignar
                                     </button>
-
                                     <button
                                         type="button"
                                         onClick={() => onDelete(passenger)}

@@ -88,18 +88,36 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        flex-wrap: wrap;
         gap: 1rem;
         margin-top: 1.5rem;
 
+        span {
+            color: v.$negro;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
         button {
-            padding: 0.6rem 1rem;
-            border: 1px solid #ccc;
+            padding: 0.65rem 1.2rem;
+            border: none;
             border-radius: v.$radio-sm;
+            background: v.$verde-azulado;
+            color: v.$blanco;
+            font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
+            transition: background 0.2s ease, opacity 0.2s ease;
+
+            &:hover:not(:disabled) {
+                opacity: 0.85;
+            }
 
             &:disabled {
-                opacity: 0.5;
+                background: #A8A8A8;
+                color: #FFFFFF;
                 cursor: not-allowed;
+                opacity: 0.65;
             }
         }
     }

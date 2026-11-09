@@ -1,4 +1,11 @@
 @use './base/reset';
 @use './base/global';
-@use '../features/drivers/styles/drivers';
 @use "./base/layout";
+
+@use '../features/users/styles/users';
+@use '../features/drivers/styles/drivers';
+@use '../features/auth/styles/auth';
+@use '../features/not-found/styles/not-found';
+@use '../features/landing/styles/landing';
+
+

@@ -1,0 +1,192 @@
+@use "../../../styles/utilities/variables" as v;
+
+.landing {
+    min-height: 100vh;
+    background: v.$fondo;
+    display: flex;
+    flex-direction: column;
+
+    &__header {
+        min-height: 85px;
+        padding: 1rem 6%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: v.$blanco;
+        border-bottom: 1px solid #e5e5e5;
+
+        h1 {
+            color: v.$verde-azulado;
+            font-size: 1.8rem;
+            letter-spacing: 0.15rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: v.$blanco;
+            background: v.$rojo;
+            padding: 0.8rem 1.4rem;
+            border-radius: v.$radio-sm;
+            font-weight: 600;
+            transition: background 0.2s ease;
+
+            &:hover {
+                background: v.$rojo-oscuro;
+            }
+        }
+    }
+
+    &__hero {
+        min-height: 540px;
+        padding: 5rem 8%;
+        display: flex;
+        align-items: center;
+        color: v.$blanco;
+        background:
+            radial-gradient(circle at 85% 25%, rgba(30, 140, 147, 0.35), transparent 35%),
+            linear-gradient(120deg, #17242d, #263b48 65%, #1e5960);
+
+        > div {
+            max-width: 760px;
+        }
+
+        p:first-child {
+            color: #65c5c5;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            line-height: 1.12;
+            margin-bottom: 1.5rem;
+        }
+
+        p:not(:first-child) {
+            max-width: 650px;
+            color: #d5e0e5;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        a {
+            display: inline-block;
+            padding: 1rem 1.6rem;
+            background: v.$rojo;
+            color: v.$blanco;
+            border-radius: v.$radio-sm;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease, background 0.2s ease;
+
+            &:hover {
+                background: v.$rojo-oscuro;
+                transform: translateY(-3px);
+            }
+        }
+    }
+
+    &__features {
+        width: min(1200px, 88%);
+        margin: 5rem auto;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.5rem;
+
+        h2 {
+            grid-column: 1 / -1;
+            margin-bottom: 1.5rem;
+            color: v.$negro;
+            font-size: 2rem;
+        }
+
+        article {
+            padding: 2rem;
+            background: v.$blanco;
+            border-radius: v.$radio-md;
+            border: 1px solid #e5e0e8;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+            &:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.09);
+            }
+
+            h3 {
+                color: v.$verde-azulado;
+                font-size: 1.25rem;
+                margin-bottom: 0.8rem;
+            }
+
+            p {
+                color: v.$gris;
+                line-height: 1.6;
+            }
+        }
+    }
+
+    &__footer {
+        margin-top: auto;
+        padding: 1.5rem;
+        text-align: center;
+        color: v.$blanco;
+        background: #17242d;
+
+        p {
+            font-size: 0.9rem;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .landing {
+        &__header {
+            padding: 1rem 5%;
+
+            h1 {
+                font-size: 1.4rem;
+            }
+        }
+
+        &__hero {
+            min-height: 450px;
+            padding: 4rem 7%;
+        }
+
+        &__features {
+            grid-template-columns: 1fr;
+            margin: 3rem auto;
+
+            h2 {
+                font-size: 1.7rem;
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .landing {
+        &__header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        &__hero {
+            min-height: 400px;
+            padding: 3rem 6%;
+
+            h2 {
+                font-size: 2.5rem;
+            }
+
+            p:not(:first-child) {
+                font-size: 1rem;
+            }
+        }
+    }
+}

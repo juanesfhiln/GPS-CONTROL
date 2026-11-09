@@ -6,9 +6,12 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import DriversPage from "./pages/DriversPage";
 import PassengersPage from "./pages/PassengersPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
+import UsersPage from "./pages/UsersPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
-import ChangePasswordForm from "./features/auth/components/ChangePasswordForm";
 import { useAuth } from "./features/auth/context/AuthContext";
+
 
 function RutaProtegida() {
     const {
@@ -27,15 +30,7 @@ function RutaProtegida() {
     }
 
     if (usuario?.cambiar_password) {
-        return (
-            <main>
-                <ChangePasswordForm />
-
-                <button onClick={cerrarSesion}>
-                    Cerrar sesión
-                </button>
-            </main>
-        );
+        return <Navigate to="/cambiar-password" replace />;
     }
 
     return (
@@ -71,6 +66,12 @@ function RutaProtegida() {
                 <NavLink to="/pasajeros">
                     Pasajeros
                 </NavLink>
+
+                {usuario?.rol === "Administrador" && (
+                    <NavLink to="/usuarios">
+                        Usuarios
+                    </NavLink>
+                )}
             </nav>
 
             <Outlet />
@@ -78,8 +79,30 @@ function RutaProtegida() {
     );
 }
 
+function RutaCambioPassword() {
+    const {
+        autenticado,
+        cargandoSesion,
+        usuario
+    } = useAuth();
+
+    if (cargandoSesion) {
+        return <p>Verificando sesión...</p>;
+    }
+
+    if (!autenticado) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (!usuario?.cambiar_password) {
+        return <Navigate to="/dashboard" replace />;
+    }
+
+    return <ChangePasswordPage />;
+}
+
 function App() {
-    const { autenticado, cargandoSesion } = useAuth();
+    const { autenticado, cargandoSesion, usuario } = useAuth();
 
     if (cargandoSesion) {
         return <p>Verificando sesión...</p>;
@@ -87,21 +110,34 @@ function App() {
 
     return (
         <Routes>
+            
             <Route path="/" element={<LandingPage />} />
+            <Route path="*" element={<NotFoundPage />} />
 
             <Route
                 path="/login"
                 element={
                     autenticado
-                        ? <Navigate to="/dashboard" replace />
+                        ? (
+                            <Navigate
+                                to={usuario?.cambiar_password ? "/cambiar-password" : "/dashboard"}
+                                replace
+                            />
+                        )
                         : <LoginPage />
                 }
             />
 
+            <Route
+                path="/cambiar-password"
+                element={<RutaCambioPassword />}
+            />
+
             <Route element={<RutaProtegida />}>
-                <Route path="/dashboard" element={<DashboardPage />}/>
+                <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/conductores" element={<DriversPage />} />
                 <Route path="/pasajeros" element={<PassengersPage />} />
+                <Route path="/usuarios" element={<UsersPage />} />
             </Route>
 
             <Route

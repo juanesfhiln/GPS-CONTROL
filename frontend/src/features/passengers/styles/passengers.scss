@@ -1,4 +1,4 @@
-
+@use "sass:color";
 @use "../../../styles/utilities/variables" as v;
 
 .passengers-page {
@@ -300,41 +300,41 @@
 }
 
 .passengers-page {
-    &__modal {
-        position: fixed;
-        inset: 0;
-        z-index: 1000;
-        background: rgba(0, 0, 0, 0.55);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 1rem;
-        overflow-y: auto;
-    }
-
-    &__error {
-        color: v.$rojo-oscuro;
-        margin-bottom: 1rem;
-        padding: 0.9rem 1rem;
-        background: #fce8e8;
-        border-left: 4px solid v.$rojo;
-        border-radius: v.$radio-sm;
-    }
-
-    &__success {
-        padding: 0.9rem 1rem;
-        margin-bottom: 1rem;
-        background: #e1f3e9;
-        color: #176b3a;
-        border-left: 4px solid v.$verde-azulado;
-        border-radius: v.$radio-sm;
-    }
-
     &__pagination {
         display: flex;
         justify-content: center;
         align-items: center;
+        flex-wrap: wrap;
         gap: 1rem;
         margin-top: 1.5rem;
+
+        span {
+            color: v.$negro;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        button {
+            padding: 0.65rem 1.2rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            background: v.$verde-azulado;
+            color: v.$blanco;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s ease, opacity 0.2s ease;
+
+            &:hover:not(:disabled) {
+                background: color.adjust(v.$verde-azulado, $lightness: -8%);
+            }
+
+            &:disabled {
+                background: #A8A8A8;
+                color: #FFFFFF;
+                cursor: not-allowed;
+                opacity: 0.65;
+            }
+        }
     }
 }

@@ -1,0 +1,50 @@
+@use "../../../styles/utilities/variables" as v;
+
+.not-found {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+
+    &__content {
+        max-width: 550px;
+        text-align: center;
+    }
+
+    &__code {
+        display: block;
+        color: v.$verde-azulado;
+        font-size: 7rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 1rem;
+    }
+
+    h1 {
+        color: v.$negro;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: v.$gris;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    &__button {
+        display: inline-block;
+        padding: 0.85rem 1.5rem;
+        background: v.$verde-azulado;
+        color: v.$blanco;
+        border-radius: v.$radio-sm;
+        text-decoration: none;
+        font-weight: 600;
+
+        &:hover {
+            opacity: 0.85;
+        }
+    }
+}

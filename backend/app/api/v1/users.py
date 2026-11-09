@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.dependencies import get_db
 from app.models.user import User
+from app.models.role import Role
 from app.api.dependencies import require_roles
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
 from app.services.user_service import (
@@ -11,7 +12,8 @@ from app.services.user_service import (
     obtener_usuarios,
     obtener_usuario,
     actualizar_usuario,
-    cambiar_estado_usuario
+    cambiar_estado_usuario,
+    restablecer_password_usuario
 )
 
 
@@ -29,6 +31,23 @@ def convertir_usuario(usuario):
         "cambiar_password": usuario.cambiar_password,
         "rol": usuario.rol.nombre
     }
+
+@router.get("/roles")
+def listar_roles(
+    db: Session = Depends(get_db),
+    usuario_actual: User = Depends(
+        require_roles("Administrador")
+    )
+):
+    roles = db.query(Role).order_by(Role.id.asc()).all()
+
+    return [
+        {
+            "id": rol.id,
+            "nombre": rol.nombre
+        }
+        for rol in roles
+    ]
 
 @router.get("/", response_model=list[UserResponse])
 def listar_usuarios(
@@ -100,3 +119,39 @@ def cambiar_estado(
         )
 
     return convertir_usuario(cambiar_estado_usuario(db, usuario))
+
+@router.post("/{usuario_id}/restablecer-password")
+def restablecer_password(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: User = Depends(
+        require_roles("Administrador")
+    )
+):
+    usuario = obtener_usuario(db, usuario_id)
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
+
+    if usuario.id == usuario_actual.id:
+        raise HTTPException(
+            status_code=400,
+            detail="No puedes restablecer tu propia contraseña desde esta opción"
+        )
+
+    try:
+        password_temporal = restablecer_password_usuario(db, usuario)
+
+        return {
+            "mensaje": "Contraseña restablecida correctamente",
+            "password_temporal": password_temporal
+        }
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible restablecer la contraseña"
+        )
