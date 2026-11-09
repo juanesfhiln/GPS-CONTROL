@@ -9,6 +9,11 @@ import PassengersPage from "./pages/PassengersPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import UsersPage from "./pages/UsersPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import MapPage from "./pages/MapPage";
+import VehicleDetailPage from "./pages/VehicleDetailPage";
+import VehiclesPage from "./pages/VehiclesPage";
+import TripsPage from "./pages/TripsPage";
+import AuditPage from "./pages/AuditPage";
 
 import { useAuth } from "./features/auth/context/AuthContext";
 
@@ -55,23 +60,22 @@ function RutaProtegida() {
             </header>
 
             <nav className="dashboard-layout__nav" aria-label="Navegación principal">
-                <NavLink to="/dashboard">
-                    Dashboard
-                </NavLink>
 
-                <NavLink to="/conductores">
-                    Conductores
-                </NavLink>
-
-                <NavLink to="/pasajeros">
-                    Pasajeros
-                </NavLink>
+                <NavLink to="/dashboard"> Dashboard </NavLink>
+                <NavLink to="/vehiculos">Vehículos</NavLink>
+                <NavLink to="/conductores"> Conductores </NavLink>
+                <NavLink to="/pasajeros"> Pasajeros </NavLink>
+                <NavLink to="/mapa">Mapa </NavLink>
+                <NavLink to="/historial-viajes">Historial de viajes</NavLink>
 
                 {usuario?.rol === "Administrador" && (
-                    <NavLink to="/usuarios">
-                        Usuarios
-                    </NavLink>
+                    <NavLink to="/usuarios">Usuarios</NavLink>
                 )}
+
+                {usuario?.rol === "Administrador" && (
+                    <NavLink to="/auditoria">Auditoría</NavLink>
+                )}
+
             </nav>
 
             <Outlet />
@@ -110,13 +114,11 @@ function App() {
 
     return (
         <Routes>
-            
+
             <Route path="/" element={<LandingPage />} />
             <Route path="*" element={<NotFoundPage />} />
 
-            <Route
-                path="/login"
-                element={
+            <Route path="/login" element={
                     autenticado
                         ? (
                             <Navigate
@@ -128,22 +130,21 @@ function App() {
                 }
             />
 
-            <Route
-                path="/cambiar-password"
-                element={<RutaCambioPassword />}
-            />
+            <Route path="/cambiar-password" element={<RutaCambioPassword />} />
 
             <Route element={<RutaProtegida />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/conductores" element={<DriversPage />} />
                 <Route path="/pasajeros" element={<PassengersPage />} />
                 <Route path="/usuarios" element={<UsersPage />} />
+                <Route path="/mapa" element={<MapPage />} />
+                <Route path="/vehiculos/:id" element={<VehicleDetailPage />} />
+                <Route path="/vehiculos" element={<VehiclesPage />} />
+                <Route path="/historial-viajes" element={<TripsPage />} />
+                <Route path="/auditoria" element={<AuditPage />} />
             </Route>
 
-            <Route
-                path="*"
-                element={<Navigate to="/" replace />}
-            />
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 }

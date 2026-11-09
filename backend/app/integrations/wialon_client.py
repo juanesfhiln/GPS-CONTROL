@@ -141,7 +141,7 @@ class WialonClient:
                 "sortType": "sys_name"
             },
             "force": 1,
-            "flags": 1025,
+            "flags": 1033,
             "from": 0,
             "to": 0
         }
@@ -450,4 +450,66 @@ class WialonClient:
         return await self._consultar(
             "resource/get_tag_bindings",
             params
+        )
+
+    async def gestionar_campo_personalizado(
+        self,
+        unidad_id: int,
+        campo_id: int,
+        accion: str,
+        nombre: str | None = None,
+        valor: str | None = None
+    ):
+        if accion not in ("create", "update", "delete"):
+            raise ValueError("La acción del campo no es válida")
+
+        parametros = {
+            "itemId": unidad_id,
+            "id": campo_id,
+            "callMode": accion
+        }
+
+        if accion in ("create", "update"):
+            if not nombre or not nombre.strip():
+                raise ValueError("El nombre del campo es obligatorio")
+
+            if valor is None:
+                raise ValueError("El valor del campo es obligatorio")
+
+            parametros["n"] = nombre.strip()
+            parametros["v"] = valor
+
+        return await self._consultar(
+            "item/update_custom_field",
+            parametros
+        )
+
+    
+    async def get_unit_trips(self, unit_id: int, time_from: int, time_to: int):
+        if unit_id <= 0:
+            raise ValueError("El ID del vehículo no es válido")
+
+        if time_from <= 0 or time_to <= time_from:
+            raise ValueError("El intervalo de fechas no es válido")
+
+        await self._consultar(
+            "messages/load_interval",
+            {
+                "itemId": unit_id,
+                "timeFrom": time_from,
+                "timeTo": time_to,
+                "flags": 0,
+                "flagsMask": 65280,
+                "loadCount": 4294967295
+            }
+        )
+
+        return await self._consultar(
+            "unit/get_trips",
+            {
+                "itemId": unit_id,
+                "msgsSource": "1",
+                "timeFrom": time_from,
+                "timeTo": time_to
+            }
         )

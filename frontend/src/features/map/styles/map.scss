@@ -1,0 +1,242 @@
+@use "../../../styles/utilities/variables" as v;
+
+.map-page {
+    min-height: calc(100vh - 140px);
+    padding: 2rem 3rem;
+    background: v.$fondo;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+
+        h1 {
+            margin: 0;
+            color: v.$negro;
+            font-size: 1.8rem;
+        }
+
+        p {
+            margin: 0.5rem 0 0;
+            color: v.$gris;
+        }
+    }
+
+    &__refresh {
+        padding: 0.75rem 1.25rem;
+        border: none;
+        border-radius: v.$radio-sm;
+        background: v.$verde-azulado;
+        color: v.$blanco;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+            opacity: 0.85;
+        }
+
+        &:focus-visible {
+            outline: 3px solid v.$negro;
+            outline-offset: 3px;
+        }
+    }
+
+    &__statistics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    &__stat {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        padding: 1.25rem;
+        border-radius: v.$radio-sm;
+        background: v.$blanco;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        span {
+            color: v.$gris;
+            font-size: 0.9rem;
+        }
+
+        strong {
+            color: v.$negro;
+            font-size: 1.8rem;
+        }
+    }
+
+    &__container {
+        height: 600px;
+        overflow: hidden;
+        border-radius: v.$radio-sm;
+        background: v.$blanco;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    &__message,
+    &__empty,
+    &__error {
+        padding: 2rem;
+        border-radius: v.$radio-sm;
+        background: v.$blanco;
+        color: v.$gris;
+        text-align: center;
+    }
+
+    &__error {
+        margin-bottom: 1rem;
+        border: 1px solid #e5a3a3;
+        background: #fff1f1;
+        color: #a52828;
+    }
+}
+
+.vehicle-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+
+    &__popup {
+        min-width: 180px;
+
+        strong {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: #222;
+            font-size: 1rem;
+        }
+
+        p {
+            margin: 0.4rem 0;
+            color: #555;
+            font-size: 0.85rem;
+        }
+    }
+
+    &__detail-button {
+        width: 100%;
+        margin-top: 0.75rem;
+        padding: 0.65rem 1rem;
+        border: none;
+        border-radius: v.$radio-sm;
+        background: v.$verde-azulado;
+        color: v.$blanco;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+            opacity: 0.85;
+        }
+
+        &:focus-visible {
+            outline: 3px solid v.$negro;
+            outline-offset: 2px;
+        }
+    }
+}
+
+.vehicle-marker {
+    border: none;
+    background: transparent;
+
+    &__dot {
+        display: block;
+        width: 16px;
+        height: 16px;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+
+        &--moving {
+            background: #16a34a;
+        }
+
+        &--stopped {
+            background: #eab308;
+        }
+
+        &--offline {
+            background: #dc2626;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .map-page {
+        padding: 1.5rem 1rem;
+
+        &__header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        &__statistics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        &__container {
+            height: 500px;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .map-page {
+        &__statistics {
+            grid-template-columns: 1fr;
+        }
+
+        &__container {
+            height: 420px;
+        }
+    }
+}
+
+.marker-cluster {
+    background-clip: padding-box;
+    border-radius: 50%;
+
+    div {
+        width: 30px;
+        height: 30px;
+        margin: 5px;
+        border-radius: 50%;
+        color: #222;
+        font-weight: 600;
+        text-align: center;
+        line-height: 30px;
+    }
+
+    &-small {
+        background-color: rgba(34, 197, 94, 0.35);
+
+        div {
+            background-color: rgba(34, 197, 94, 0.75);
+        }
+    }
+
+    &-medium {
+        background-color: rgba(234, 179, 8, 0.35);
+
+        div {
+            background-color: rgba(234, 179, 8, 0.75);
+        }
+    }
+
+    &-large {
+        background-color: rgba(220, 38, 38, 0.35);
+
+        div {
+            background-color: rgba(220, 38, 38, 0.75);
+            color: #fff;
+        }
+    }
+}

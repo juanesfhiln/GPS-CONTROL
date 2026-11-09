@@ -1,0 +1,197 @@
+
+.trips-page {
+    padding: 2rem;
+    min-height: 100%;
+
+    &__header {
+        margin-bottom: 2rem;
+
+        h1 {
+            margin: 0 0 0.5rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        p {
+            margin: 0;
+            color: #777;
+        }
+    }
+
+    &__filters {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr)) auto;
+        align-items: end;
+        gap: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+
+        button {
+            min-height: 44px;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            background: #c62828;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+
+            &:hover:not(:disabled) {
+                background: #a91f1f;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-height: 44px;
+            padding: 0.65rem;
+            border: 1px solid #d5d5d5;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font: inherit;
+
+            &:focus {
+                outline: 2px solid rgba(198, 40, 40, 0.2);
+                border-color: #c62828;
+            }
+        }
+    }
+
+    &__message {
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+
+        &--error {
+            background: #fdeaea;
+            color: #a91f1f;
+            border: 1px solid #f2c5c5;
+        }
+
+        &--warning {
+            background: #fff4d6;
+            color: #805b00;
+            border: 1px solid #f0d994;
+        }
+    }
+
+    &__results {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    &__summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+
+        > div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding: 1.25rem;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            min-width: 0;
+
+            span {
+                color: #777;
+                font-size: 0.85rem;
+            }
+
+            strong {
+                font-size: 1.1rem;
+                overflow-wrap: anywhere;
+            }
+        }
+    }
+
+    &__table-container {
+        overflow-x: auto;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+    }
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f7f7f7;
+            color: #555;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        td {
+            font-size: 0.9rem;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+    }
+}
+
+@media (max-width: 1000px) {
+    .trips-page {
+        &__filters {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        &__summary {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .trips-page {
+        padding: 1rem;
+
+        &__filters {
+            grid-template-columns: 1fr;
+        }
+
+        &__header h1 {
+            font-size: 1.5rem;
+        }
+    }
+}

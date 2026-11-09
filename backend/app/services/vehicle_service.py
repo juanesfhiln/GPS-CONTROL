@@ -1,4 +1,3 @@
-
 import asyncio
 import time
 
@@ -39,6 +38,45 @@ class VehicleService:
             self._cache_timestamp = time.monotonic()
 
             return vehiculos
+
+    async def invalidar_cache(self):
+
+        async with self._cache_lock:
+            self._cache_vehiculos = None
+            self._cache_timestamp = 0
+
+    async def actualizar_campo_personalizado(
+        self,
+        unidad_id: int,
+        campo_id: int,
+        nombre: str,
+        valor: str
+    ):
+
+        vehiculos = await self.obtener_vehiculos()
+
+        vehiculo = next(
+            (v for v in vehiculos if v.id == unidad_id),
+            None
+        )
+
+        if vehiculo is None:
+            raise ValueError("El vehículo no existe")
+
+        if str(campo_id) not in vehiculo.custom_fields:
+            raise ValueError("El campo personalizado no existe")
+
+        resultado = await self.wialon_client.gestionar_campo_personalizado(
+            unidad_id=unidad_id,
+            campo_id=campo_id,
+            accion="update",
+            nombre=nombre,
+            valor=valor
+        )
+
+        await self.invalidar_cache()
+
+        return resultado
 
 
 vehicle_service = VehicleService()

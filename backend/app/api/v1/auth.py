@@ -1,11 +1,5 @@
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    status,
-    Response
-)
 from sqlalchemy.orm import Session
 
 from app.db.dependencies import get_db
@@ -15,6 +9,7 @@ from app.api.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.password import PasswordChange
 from app.core.csrf import generar_csrf_token
+from app.services.audit_service import audit_service
 
 from app.core.security import (
     COOKIE_SECURE,
@@ -24,12 +19,16 @@ from app.core.security import (
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
+
 @router.post("/login")
 def login(
     datos: LoginRequest,
     response: Response,
+    request: Request,
     db: Session = Depends(get_db)
 ):
+    direccion_ip = request.client.host if request.client else None
+
     resultado = authenticate_user(
         db,
         datos.correo,
@@ -37,10 +36,34 @@ def login(
     )
 
     if resultado is None:
+        audit_service.registrar(
+            db=db,
+            usuario_id=None,
+            accion="LOGIN",
+            modulo="AUTENTICACION",
+            descripcion="Intento de inicio de sesión fallido",
+            resultado="FALLIDO",
+            direccion_ip=direccion_ip
+        )
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Correo o contraseña incorrectos"
         )
+
+    usuario = db.query(User).filter(
+        User.correo == datos.correo
+    ).first()
+
+    audit_service.registrar(
+        db=db,
+        usuario_id=usuario.id,
+        accion="LOGIN",
+        modulo="AUTENTICACION",
+        descripcion="Inicio de sesión exitoso",
+        resultado="EXITOSO",
+        direccion_ip=direccion_ip
+    )
 
     max_age = ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
@@ -76,12 +99,23 @@ def login(
 @router.post("/logout")
 def logout(
     response: Response,
+    request: Request,
     usuario: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     try:
         usuario.version_token += 1
         db.commit()
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="LOGOUT",
+            modulo="AUTENTICACION",
+            descripcion="Cierre de sesión y revocación de sesiones",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
+        )
 
         response.delete_cookie(
             key="access_token",
@@ -124,10 +158,12 @@ def obtener_usuario_actual(
         "cambiar_password": usuario.cambiar_password
     }
 
+
 @router.post("/change-password")
 def cambiar_password(
     datos: PasswordChange,
     response: Response,
+    request: Request,
     db: Session = Depends(get_db),
     usuario: User = Depends(get_current_user)
 ):
@@ -137,6 +173,16 @@ def cambiar_password(
             usuario=usuario,
             password_actual=datos.password_actual,
             password_nueva=datos.password_nueva
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="CHANGE_PASSWORD",
+            modulo="AUTENTICACION",
+            descripcion="Cambio de contraseña realizado correctamente",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         csrf_token = generar_csrf_token()

@@ -1,23 +1,14 @@
 
 import logging
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Query,
-    status
-)
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 
 from app.api.dependencies import require_roles
 from app.services.passenger_service import passenger_service
-
-from app.schemas.passenger import (
-    PassengerResponse,
-    PassengerCreate,
-    PassengerUpdate,
-    PassengerOperationResponse
-)
+from sqlalchemy.orm import Session
+from app.db.dependencies import get_db
+from app.services.audit_service import audit_service
+from app.schemas.passenger import PassengerResponse, PassengerCreate, PassengerUpdate, PassengerOperationResponse
 
 logger = logging.getLogger(__name__)
 
@@ -90,13 +81,11 @@ async def listar_pasajeros(
             detail="No fue posible consultar los pasajeros en Wialon"
         )
 
-@router.post(
-    "/",
-    response_model=PassengerOperationResponse,
-    status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=PassengerOperationResponse, status_code=status.HTTP_201_CREATED)
 async def crear_pasajero(
     datos: PassengerCreate,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(
         require_roles("Administrador", "Operador")
     )
@@ -107,6 +96,16 @@ async def crear_pasajero(
             codigo=datos.code,
             telefono=datos.phone,
             campos_personalizados=datos.custom_fields
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="CREATE",
+            modulo="PASAJEROS",
+            descripcion=f"Creación del pasajero ID {pasajero_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -130,13 +129,14 @@ async def crear_pasajero(
             detail="No fue posible confirmar la creación del pasajero en Wialon"
         )
 
-@router.put(
-    "/{passenger_id}",
-    response_model=PassengerOperationResponse
-)
+
+@router.put("/{passenger_id}", response_model=PassengerOperationResponse)
+
 async def actualizar_pasajero(
     passenger_id: int,
     datos: PassengerUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(
         require_roles("Administrador", "Operador")
     )
@@ -148,6 +148,16 @@ async def actualizar_pasajero(
             codigo=datos.code,
             telefono=datos.phone,
             campos_personalizados=datos.custom_fields
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="UPDATE",
+            modulo="PASAJEROS",
+            descripcion=f"Actualización del pasajero ID {passenger_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -171,12 +181,11 @@ async def actualizar_pasajero(
             detail="No fue posible confirmar la actualización del pasajero en Wialon"
         )
 
-@router.delete(
-    "/{passenger_id}",
-    response_model=PassengerOperationResponse
-)
+@router.delete("/{passenger_id}", response_model=PassengerOperationResponse)
 async def eliminar_pasajero(
     passenger_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(
         require_roles("Administrador", "Operador")
     )
@@ -184,6 +193,16 @@ async def eliminar_pasajero(
     try:
         resultado = await passenger_service.eliminar_pasajero(
             passenger_id=passenger_id
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="DELETE",
+            modulo="PASAJEROS",
+            descripcion=f"Eliminación del pasajero ID {passenger_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -207,13 +226,12 @@ async def eliminar_pasajero(
             detail="No fue posible confirmar la eliminación del pasajero en Wialon"
         )
 
-@router.post(
-    "/{passenger_id}/asignar/{unit_id}",
-    response_model=PassengerOperationResponse
-)
+@router.post("/{passenger_id}/asignar/{unit_id}", response_model=PassengerOperationResponse)
 async def asignar_pasajero(
     passenger_id: int,
     unit_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(
         require_roles("Administrador", "Operador")
     )
@@ -222,6 +240,16 @@ async def asignar_pasajero(
         await passenger_service.asignar_pasajero(
             passenger_id=passenger_id,
             unit_id=unit_id
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="ASSIGN",
+            modulo="PASAJEROS",
+            descripcion=f"Asignación del pasajero ID {passenger_id} al vehículo ID {unit_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -246,13 +274,12 @@ async def asignar_pasajero(
             detail="No fue posible asignar el pasajero en Wialon"
         )
 
-@router.delete(
-    "/{passenger_id}/desvincular/{unit_id}",
-    response_model=PassengerOperationResponse
-)
+@router.delete("/{passenger_id}/desvincular/{unit_id}", response_model=PassengerOperationResponse)
 async def desvincular_pasajero(
     passenger_id: int,
     unit_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(
         require_roles("Administrador", "Operador")
     )
@@ -261,6 +288,16 @@ async def desvincular_pasajero(
         await passenger_service.desvincular_pasajero(
             passenger_id=passenger_id,
             unit_id=unit_id
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="UNASSIGN",
+            modulo="PASAJEROS",
+            descripcion=f"Desvinculación del pasajero ID {passenger_id} del vehículo ID {unit_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -284,3 +321,4 @@ async def desvincular_pasajero(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="No fue posible desvincular el pasajero en Wialon"
         )
+

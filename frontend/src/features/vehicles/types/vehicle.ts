@@ -1,3 +1,8 @@
+export interface VehicleCustomField {
+    n: string;
+    v: string;
+    [key: string]: unknown;
+}
 
 export interface Vehicle {
     id: number;
@@ -5,12 +10,13 @@ export interface Vehicle {
     latitude: number | null;
     longitude: number | null;
     speed: number;
-    heading: number;
-    heading_cardinal: string;
+    heading: number | null;
+    heading_cardinal: string | null;
     altitude: number | null;
     position_time: string | null;
-    last_update_time: string | null;
+    last_message_time: string | null;
     status: string;
+    custom_fields: Record<string, VehicleCustomField>;
 }
 
 export interface VehiclesResponse {

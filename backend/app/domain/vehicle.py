@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -16,3 +16,4 @@ class Vehicle:
     position_time: Optional[datetime]
     last_message_time: Optional[datetime]
     status: str
+    custom_fields: dict[str, Any] = field(default_factory=dict)

@@ -1,0 +1,203 @@
+@use "../../../styles/utilities/variables" as v;
+
+.vehicles-page {
+    min-height: calc(100vh - 140px);
+    padding: 2rem 3rem;
+    background: v.$fondo;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+
+        h1 {
+            margin: 0;
+            color: v.$negro;
+            font-size: 1.8rem;
+        }
+
+        p {
+            margin: 0.5rem 0 0;
+            color: v.$gris;
+        }
+    }
+
+    &__total {
+        color: v.$gris;
+        font-weight: 700;
+    }
+
+    &__filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+
+        input,
+        select {
+            padding: 0.8rem 1rem;
+            border: 1px solid #dcdcdc;
+            border-radius: v.$radio-sm;
+            background: v.$blanco;
+            color: v.$negro;
+            font-size: 0.95rem;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    &__table-container {
+        overflow-x: auto;
+        border-radius: v.$radio-md;
+        background: v.$blanco;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        th {
+            color: v.$gris;
+            font-size: 0.85rem;
+        }
+
+        td {
+            color: v.$negro;
+            font-size: 0.9rem;
+        }
+
+        button {
+            padding: 0.6rem 0.9rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            color: v.$blanco;
+            background: v.$rojo;
+            cursor: pointer;
+            transition: background 0.2s ease, opacity 0.2s ease;
+
+            &:hover:not(:disabled) {
+                background: v.$rojo-oscuro;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    &__status {
+        display: inline-block;
+        padding: 0.35rem 0.6rem;
+        border-radius: v.$radio-sm;
+        font-size: 0.8rem;
+        text-transform: capitalize;
+        background: #e9e9e9;
+        color: v.$negro;
+
+        &--en_movimiento {
+            background: #d9f0e1;
+            color: #218838;
+        }
+
+        &--detenido {
+            background: #fff0d5;
+            color: #946200;
+        }
+
+        &--sin_senal {
+            background: #f8dfe1;
+            color: v.$rojo-oscuro;
+        }
+    }
+
+    &__pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+
+        button {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            color: v.$blanco;
+            background: v.$rojo;
+            cursor: pointer;
+            transition: background 0.2s ease, opacity 0.2s ease;
+
+            &:hover:not(:disabled) {
+                background: v.$rojo-oscuro;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    &__empty,
+    &__error {
+        padding: 1rem;
+        color: v.$gris;
+    }
+
+    &__error {
+        color: v.$rojo-oscuro;
+    }
+
+    &__filters {
+        button {
+            min-height: 42px;
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background: v.$rojo;
+            color: v.$blanco;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, opacity 0.2s ease;
+
+            &:hover:not(:disabled) {
+                background: v.$rojo-oscuro;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .vehicles-page {
+        padding: 1.5rem 1rem;
+
+        &__header {
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        &__filters {
+            flex-direction: column;
+        }
+
+        &__pagination {
+            gap: 0.75rem;
+        }
+    }
+}

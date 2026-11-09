@@ -49,6 +49,12 @@
             padding: 0.8rem;
             border: 1px solid #ccc;
             border-radius: v.$radio-sm;
+            font: inherit;
+
+            &:focus {
+                outline: 2px solid v.$verde-azulado;
+                border-color: transparent;
+            }
         }
 
         button {
@@ -126,11 +132,11 @@
         position: fixed;
         inset: 0;
         z-index: 1000;
-        background: rgba(0, 0, 0, 0.55);
         display: flex;
         justify-content: center;
         align-items: center;
         padding: 1rem;
+        background: rgba(0, 0, 0, 0.55);
     }
 }
 
@@ -183,24 +189,27 @@
 }
 
 .driver-form {
-    width: 100%;
-    max-width: 500px;
-    background: v.$blanco;
-    padding: 2rem;
-    border-radius: v.$radio-md;
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 480px;
+    max-height: calc(100vh - 2rem);
+    margin: 0;
+    padding: 2rem;
+    overflow-y: auto;
+    border-radius: v.$radio-md;
+    background: v.$blanco;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 
     h2 {
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
         color: v.$negro;
     }
 
     label {
-        font-weight: 600;
         color: v.$gris;
+        font-weight: 600;
     }
 
     input,
@@ -220,22 +229,30 @@
     &__actions {
         display: flex;
         justify-content: flex-end;
+        flex-wrap: wrap;
         gap: 0.7rem;
         margin-top: 1rem;
 
         button {
-            padding: 0.7rem 1rem;
+            min-width: 110px;
+            padding: 0.75rem 1.2rem;
             border: none;
             border-radius: v.$radio-sm;
+            font-weight: 600;
             cursor: pointer;
 
+            &:first-child {
+                background: v.$fondo;
+                color: v.$negro;
+            }
+
             &:last-child {
-                background: v.$rojo;
+                background: v.$verde-azulado;
                 color: v.$blanco;
             }
 
             &:disabled {
-                opacity: 0.6;
+                opacity: 0.55;
                 cursor: not-allowed;
             }
         }
@@ -329,6 +346,53 @@
     }
 }
 
+.driver-confirm {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+    border-radius: v.$radio-md;
+    background: v.$blanco;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+
+    h2 {
+        margin-bottom: 1rem;
+        color: v.$negro;
+    }
+
+    p {
+        margin-bottom: 1.5rem;
+        color: v.$gris;
+        line-height: 1.5;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+
+        button {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: v.$radio-sm;
+            background: v.$fondo;
+            color: v.$negro;
+            font-weight: 600;
+            cursor: pointer;
+
+            &:disabled {
+                opacity: 0.55;
+                cursor: not-allowed;
+            }
+        }
+
+        .driver-confirm__delete {
+            background: v.$rojo;
+            color: v.$blanco;
+        }
+    }
+}
+
 @media (max-width: 768px) {
     .drivers-page {
         padding: 1rem;
@@ -351,7 +415,9 @@
 }
 
 @media (max-width: 480px) {
-    .driver-assignment {
-        padding: 1.3rem;
+    .driver-form,
+    .driver-assignment,
+    .driver-confirm {
+        padding: 1.25rem;
     }
 }

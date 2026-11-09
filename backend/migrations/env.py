@@ -4,7 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 
 from app.db.database import Base, DATABASE_URL
-from app.models import Role, User
+from app.models import Role, User, AuditLog
 
 config = context.config
 

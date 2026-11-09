@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi import APIRouter, Depends, Query, HTTPException, status, Request
 
 from app.api.dependencies import require_roles
 from app.schemas.driver import DriverResponse, DriverCreate, DriverUpdate
 from app.services.driver_service import driver_service
+from sqlalchemy.orm import Session
+from app.db.dependencies import get_db
+from app.services.audit_service import audit_service
 
 import logging
 
@@ -105,16 +108,29 @@ async def listar_asignaciones(
             detail="No fue posible consultar las asignaciones en Wialon"
         )
 
+
 @router.post("/{driver_id}/asignar/{unit_id}")
 async def asignar_conductor(
     driver_id: int,
     unit_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(require_roles("Administrador", "Operador"))
 ):
     try:
         await driver_service.asignar_conductor(
             driver_id=driver_id,
             unit_id=unit_id
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="ASSIGN",
+            modulo="CONDUCTORES",
+            descripcion=f"Asignación del conductor ID {driver_id} al vehículo ID {unit_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -139,16 +155,29 @@ async def asignar_conductor(
             detail="No fue posible asignar el conductor en Wialon"
         )
 
+
 @router.delete("/{driver_id}/desvincular/{unit_id}")
 async def desvincular_conductor(
     driver_id: int,
     unit_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(require_roles("Administrador", "Operador"))
 ):
     try:
         await driver_service.desvincular_conductor(
             driver_id=driver_id,
             unit_id=unit_id
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="UNASSIGN",
+            modulo="CONDUCTORES",
+            descripcion=f"Desvinculación del conductor ID {driver_id} del vehículo ID {unit_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -173,9 +202,12 @@ async def desvincular_conductor(
             detail="No fue posible desvincular el conductor en Wialon"
         )
 
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def crear_conductor(
     datos: DriverCreate,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(require_roles("Administrador", "Operador"))
 ):
     try:
@@ -184,6 +216,16 @@ async def crear_conductor(
             codigo=datos.code,
             telefono=datos.phone,
             descripcion=datos.description
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="CREATE",
+            modulo="CONDUCTORES",
+            descripcion=f"Creación del conductor ID {resultado}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -207,10 +249,13 @@ async def crear_conductor(
             detail="No fue posible confirmar la creación del conductor en Wialon"
         )
 
+
 @router.put("/{driver_id}")
 async def actualizar_conductor(
     driver_id: int,
     datos: DriverUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(require_roles("Administrador", "Operador"))
 ):
     try:
@@ -220,6 +265,16 @@ async def actualizar_conductor(
             codigo=datos.code,
             telefono=datos.phone,
             descripcion=datos.description
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="UPDATE",
+            modulo="CONDUCTORES",
+            descripcion=f"Actualización del conductor ID {driver_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {
@@ -243,14 +298,27 @@ async def actualizar_conductor(
             detail="No fue posible confirmar la actualización del conductor en Wialon"
         )
 
+
 @router.delete("/{driver_id}")
 async def eliminar_conductor(
     driver_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
     usuario=Depends(require_roles("Administrador", "Operador"))
 ):
     try:
         resultado = await driver_service.eliminar_conductor(
             driver_id=driver_id
+        )
+
+        audit_service.registrar(
+            db=db,
+            usuario_id=usuario.id,
+            accion="DELETE",
+            modulo="CONDUCTORES",
+            descripcion=f"Eliminación del conductor ID {driver_id}",
+            resultado="EXITOSO",
+            direccion_ip=request.client.host if request.client else None
         )
 
         return {

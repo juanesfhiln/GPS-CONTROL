@@ -33,6 +33,7 @@ function DriversPage() {
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState("");
+    const [conductorAEliminar, setConductorAEliminar] = useState<Driver | null>(null);
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [conductorSeleccionado, setConductorSeleccionado] = useState<Driver | null>(null);
@@ -179,17 +180,12 @@ function DriversPage() {
     }
 
     async function eliminarConductor(conductor: Driver) {
-        const confirmar = window.confirm(
-            `¿Estás seguro de eliminar al conductor ${conductor.name}?`
-        );
-
-        if (!confirmar) return;
-
         try {
             setError("");
 
             await deleteDriver(conductor.id);
 
+            setConductorAEliminar(null);
             await cargarConductores();
         } catch (err) {
             setError(
@@ -253,7 +249,7 @@ function DriversPage() {
                 puedeGestionar={puedeGestionar}
                 cargando={cargando}
                 onEditar={abrirFormulario}
-                onEliminar={eliminarConductor}
+                onEliminar={setConductorAEliminar}
                 onAsignar={abrirAsignacion}
             />
 
@@ -303,6 +299,36 @@ function DriversPage() {
                             }
                         }}
                     />
+                </div>
+            )}
+
+            {conductorAEliminar && (
+                <div className="drivers-page__modal">
+                    <div className="driver-confirm">
+                        <h2>Confirmar eliminación</h2>
+
+                        <p>
+                            ¿Estás seguro de eliminar al conductor{" "}
+                            <strong>{conductorAEliminar.name}</strong>?
+                        </p>
+
+                        <div className="driver-confirm__actions">
+                            <button
+                                type="button"
+                                onClick={() => setConductorAEliminar(null)}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="driver-confirm__delete"
+                                onClick={() => eliminarConductor(conductorAEliminar)}
+                            >
+                                Eliminar conductor
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </section>

@@ -4,10 +4,9 @@ from fastapi.responses import HTMLResponse
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, users, vehicles, dashboard, drivers, passengers
+from app.api.v1 import auth, users, vehicles, dashboard, drivers, passengers, trips, audit
 from app.core.csrf import verificar_csrf, ALLOWED_ORIGINS
 from app.services.vehicle_service import vehicle_service
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -89,6 +88,8 @@ app.include_router(vehicles.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(drivers.router, prefix="/api/v1")
 app.include_router(passengers.router, prefix="/api/v1")
+app.include_router(trips.router,prefix="/api/v1/trips", tags=["Historial de viajes"])
+app.include_router(audit.router, prefix="/api/v1/audit", tags=["Auditoría"])
 
 @app.get("/")
 def inicio():

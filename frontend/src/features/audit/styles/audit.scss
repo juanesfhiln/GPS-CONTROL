@@ -1,0 +1,236 @@
+
+.audit-page {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    color: #252525;
+
+    &__heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+
+        h1 {
+            margin: 0.4rem 0;
+            font-size: 1.8rem;
+        }
+
+        p {
+            margin: 0;
+            color: #777;
+        }
+    }
+
+    &__eyebrow {
+        color: #c62828;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    &__total {
+        min-width: 150px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+
+        span {
+            color: #777;
+            font-size: 0.85rem;
+        }
+
+        strong {
+            font-size: 1.8rem;
+        }
+    }
+
+    &__filters {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(150px, 1fr)) auto;
+        align-items: end;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-width: 0;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            color: #252525;
+            font: inherit;
+            outline: none;
+
+            &:focus {
+                border-color: #c62828;
+            }
+        }
+    }
+
+    &__clear {
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        background: #c62828;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover {
+            background: #a91f1f;
+        }
+    }
+
+    &__table-container {
+        overflow-x: auto;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+    }
+
+    &__table {
+        width: 100%;
+        min-width: 1050px;
+        border-collapse: collapse;
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: #f8f8f8;
+            color: #555;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td {
+            color: #444;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+    }
+
+    &__status {
+        display: inline-block;
+        padding: 0.35rem 0.65rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        white-space: nowrap;
+
+        &--exitoso {
+            background: #e4f5eb;
+            color: #247344;
+        }
+
+        &--fallido {
+            background: #fde8e8;
+            color: #b42318;
+        }
+    }
+
+    &__message {
+        padding: 2rem;
+        text-align: center;
+        color: #777;
+    }
+
+    &__error {
+        padding: 1rem;
+        border-radius: 8px;
+        background: #fde8e8;
+        color: #b42318;
+    }
+
+    &__pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+
+        span {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        div {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.65rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+
+            &:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+
+            &:not(:disabled):hover {
+                border-color: #c62828;
+                color: #c62828;
+            }
+        }
+    }
+}
+
+@media (max-width: 900px) {
+    .audit-page {
+        &__filters {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .audit-page {
+        padding: 1rem;
+
+        &__heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        &__filters {
+            grid-template-columns: 1fr;
+        }
+
+        &__pagination {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+}

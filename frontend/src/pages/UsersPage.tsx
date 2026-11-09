@@ -324,6 +324,12 @@ function UsersPage() {
                                     <td className="users-table__actions">
                                         <button
                                             type="button"
+                                            onClick={() => abrirFormulario(usuarioItem)}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            type="button"
                                             disabled={usuarioItem.id === usuario?.id || !usuarioItem.activo}
                                             onClick={() => setUsuarioReset(usuarioItem)}
                                         >
@@ -419,6 +425,7 @@ function UsersPage() {
                             onChange={(evento) =>
                                 actualizarCampo("rol_id", evento.target.value)
                             }
+                            disabled={usuarioSeleccionado?.id === usuario?.id}
                         >
                             <option value="">
                                 Selecciona un rol

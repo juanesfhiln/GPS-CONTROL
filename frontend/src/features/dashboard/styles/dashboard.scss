@@ -55,7 +55,7 @@
   }
 
   &__section-title {
-    margin-bottom: 1rem;
+    margin: 0 0 1rem;
     font-size: 1.2rem;
     color: v.$negro;
   }
@@ -64,9 +64,11 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.2rem;
+    margin-bottom: 1rem;
   }
 
   &__card {
+    min-width: 0;
     padding: 1.5rem;
     background: #fafafa;
     border-radius: v.$radio-md;
@@ -117,8 +119,88 @@
     border-left: 4px solid v.$rojo-oscuro;
   }
 
+  &__charts {
+    margin-top: 3rem;
+    padding-top: 1rem;
+  }
+
+  &__charts > .dashboard__section-title {
+    margin: 0 0 1.5rem;
+  }
+
+  &__charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  &__chart-card {
+    min-width: 0;
+    padding: 1.5rem;
+    background: v.$blanco;
+    border: 1px solid rgba(v.$negro, 0.08);
+    border-radius: v.$radio-md;
+    box-shadow: 0 3px 10px rgba(v.$negro, 0.08);
+  }
+
+  &__chart-title {
+    margin: 0 0 0.8rem;
+    color: v.$negro;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  &__chart-description {
+    margin: 0 0 1.2rem;
+    color: v.$gris;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  &__chart {
+    width: 100%;
+    height: 320px;
+    min-width: 0;
+  }
+
+  &__connection {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.2rem;
+    font-size: 0.85rem;
+    color: v.$verde-azulado;
+  }
+
+  &__connection-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #1e9e62;
+  }
+
+  &__connection-dot--offline {
+    background: v.$rojo;
+  }
+
+  &__connection-dot--loading {
+    background: #d99b30;
+    animation: skeleton-pulse 1.2s ease-in-out infinite;
+  }
+
+  &__connection-time {
+    color: v.$gris;
+  }
+
+  &__warning {
+    margin-top: 0.8rem;
+    color: v.$rojo-oscuro;
+    font-size: 0.9rem;
+  }
+
   &__footer {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     padding: 1.2rem 1.5rem;
     background: v.$blanco;
     border-radius: v.$radio-md;
@@ -135,31 +217,40 @@
     background: v.$blanco;
     border-radius: v.$radio-sm;
   }
-}
 
-@media (max-width: 900px) {
-  .dashboard {
-    &__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  &__card--skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
-}
 
-@media (max-width: 600px) {
-  .dashboard {
-    padding: 1rem;
+  &__skeleton {
+    display: block;
+    border-radius: v.$radio-sm;
+    background: linear-gradient(
+      90deg,
+      #c2c8d0 0%,
+      #e2e6eb 25%,
+      #ffffff 50%,
+      #e2e6eb 75%,
+      #c2c8d0 100%
+    );
+    background-size: 300% 100%;
+    animation: skeleton-loading 1.4s ease-in-out infinite;
 
-    &__header {
-      align-items: flex-start;
-      flex-direction: column;
+    &--label {
+      width: 65%;
+      height: 16px;
     }
 
-    &__grid {
-      grid-template-columns: 1fr;
+    &--value {
+      width: 45%;
+      height: 34px;
     }
 
-    &__card-value {
-      font-size: 1.7rem;
+    &--footer {
+      width: 55%;
+      height: 16px;
     }
   }
 }
@@ -208,86 +299,6 @@
   }
 }
 
-@media (max-width: 600px) {
-  .dashboard-layout__header {
-    padding: 1rem;
-    gap: 0.8rem;
-  }
-}
-
-.dashboard {
-  &__connection {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 1.2rem;
-    font-size: 0.85rem;
-    color: v.$verde-azulado;
-  }
-
-  &__connection-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #1e9e62;
-  }
-
-  &__connection-dot--offline {
-    background: v.$rojo;
-  }
-
-  &__connection-time {
-    color: v.$gris;
-  }
-}
-
-// Skeleton Loading
-.dashboard {
-  &__card--skeleton {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  &__skeleton {
-    display: block;
-    border-radius: v.$radio-sm;
-
-    background: linear-gradient(
-      90deg,
-      #c2c8d0 0%,
-      #e2e6eb 25%,
-      #ffffff 50%,
-      #e2e6eb 75%,
-      #c2c8d0 100%
-    );
-
-    background-size: 300% 100%;
-    animation: skeleton-loading 1.4s ease-in-out infinite;
-
-    &--label {
-      width: 65%;
-      height: 16px;
-    }
-
-    &--value {
-      width: 45%;
-      height: 34px;
-    }
-
-    &--footer {
-      width: 55%;
-      height: 16px;
-    }
-  }
-
-  &__connection-dot--loading {
-    background: #d99b30;
-    animation: skeleton-pulse 1.2s ease-in-out infinite;
-  }
-}
-
 @keyframes skeleton-loading {
   from {
     background-position: 100% 0;
@@ -299,7 +310,8 @@
 }
 
 @keyframes skeleton-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
 
@@ -308,9 +320,70 @@
   }
 }
 
+@media (max-width: 900px) {
+  .dashboard {
+    &__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__charts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard {
+    padding: 1rem;
+
+    &__header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    &__grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    &__card-value {
+      font-size: 1.7rem;
+    }
+
+    &__charts {
+      margin-top: 2rem;
+    }
+
+    &__charts-grid {
+      gap: 1rem;
+    }
+
+    &__chart-card {
+      padding: 1rem;
+    }
+
+    &__chart {
+      height: 280px;
+    }
+
+    &__footer {
+      padding: 1rem;
+    }
+  }
+
+  .dashboard-layout__header {
+    padding: 1rem;
+    gap: 0.8rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dashboard__skeleton,
   .dashboard__connection-dot--loading {
     animation: none;
+  }
+
+  .dashboard__card {
+    transition: none;
   }
 }

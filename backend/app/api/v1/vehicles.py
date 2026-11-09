@@ -1,8 +1,9 @@
+import httpx
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 
 from app.api.dependencies import require_roles
-from app.schemas.vehicle import VehicleResponse
+from app.schemas.vehicle import VehicleResponse, VehicleCustomFieldUpdate
 from app.services.vehicle_service import vehicle_service
 
 
@@ -34,7 +35,7 @@ async def listar_vehiculos(
     vehiculos = await vehicle_service.obtener_vehiculos()
 
     if buscar is not None:
-        termino = buscar.strip().lower()
+        termino = buscar.strip().casefold()
 
         if not termino:
             raise HTTPException(
@@ -42,9 +43,26 @@ async def listar_vehiculos(
                 detail="El término de búsqueda no puede estar vacío"
             )
 
+        def coincide_placa(vehiculo):
+            for campo in vehiculo.custom_fields.values():
+                if not isinstance(campo, dict):
+                    continue
+
+                nombre = str(campo.get("n", "")).strip().casefold()
+                valor = str(campo.get("v", "")).strip().casefold()
+
+                if nombre == "placa" and termino in valor:
+                    return True
+
+            return False
+
         vehiculos = [
             v for v in vehiculos
-            if termino in v.name.lower() or termino in str(v.id)
+            if (
+                termino in v.name.casefold()
+                or termino in str(v.id)
+                or coincide_placa(v)
+            )
         ]
 
     if estado:
@@ -69,3 +87,37 @@ async def listar_vehiculos(
             for v in vehiculos_paginados
         ]
     }
+
+@router.put("/{unidad_id}/custom-fields/{campo_id}")
+async def actualizar_campo_personalizado(
+    unidad_id: int,
+    campo_id: int,
+    datos: VehicleCustomFieldUpdate,
+    usuario=Depends(
+        require_roles("Administrador", "Operador")
+    )
+):
+    try:
+        resultado = await vehicle_service.actualizar_campo_personalizado(
+            unidad_id=unidad_id,
+            campo_id=campo_id,
+            nombre=datos.nombre,
+            valor=datos.valor
+        )
+
+        return {
+            "mensaje": "Campo personalizado actualizado correctamente",
+            "resultado": resultado
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=404,
+            detail=str(error)
+        )
+
+    except (RuntimeError, httpx.HTTPError):
+        raise HTTPException(
+            status_code=502,
+            detail="No fue posible actualizar el campo en Wialon"
+        )

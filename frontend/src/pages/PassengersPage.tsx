@@ -34,16 +34,15 @@ function PassengersPage() {
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [guardandoAsignacion, setGuardandoAsignacion] = useState(false);
+    const [pasajeroAEliminar, setPasajeroAEliminar] = useState<Passenger | null>(null);
 
     const [error, setError] = useState("");
     const [mensaje, setMensaje] = useState("");
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const [pasajeroSeleccionado, setPasajeroSeleccionado] =
-        useState<Passenger | null>(null);
+    const [pasajeroSeleccionado, setPasajeroSeleccionado] = useState<Passenger | null>(null);
 
-    const [pasajeroAsignacion, setPasajeroAsignacion] =
-        useState<Passenger | null>(null);
+    const [pasajeroAsignacion, setPasajeroAsignacion] = useState<Passenger | null>(null);
 
     const puedeGestionar =
         usuario?.rol === "Admin" ||
@@ -188,12 +187,6 @@ function PassengersPage() {
     }
 
     async function eliminarPasajero(pasajero: Passenger) {
-        const confirmar = window.confirm(
-            `¿Estás seguro de eliminar al pasajero ${pasajero.name}?`
-        );
-
-        if (!confirmar) return;
-
         try {
             setError("");
             setMensaje("");
@@ -201,6 +194,8 @@ function PassengersPage() {
             await deletePassenger(pasajero.id);
 
             setMensaje("Pasajero eliminado correctamente.");
+            setPasajeroAEliminar(null);
+
             await cargarPasajeros();
         } catch (err) {
             setError(
@@ -264,7 +259,7 @@ function PassengersPage() {
                 passengers={pasajeros}
                 puedeAdministrar={puedeGestionar}
                 onEdit={abrirFormulario}
-                onDelete={eliminarPasajero}
+                onDelete={setPasajeroAEliminar}
                 onAssign={abrirAsignacion}
             />
 
@@ -316,6 +311,36 @@ function PassengersPage() {
                             }
                         }}
                     />
+                </div>
+            )}
+
+            {pasajeroAEliminar && (
+                <div className="passengers-page__modal">
+                    <div className="passenger-confirm">
+                        <h2>Confirmar eliminación</h2>
+
+                        <p>
+                            ¿Estás seguro de eliminar al pasajero{" "}
+                            <strong>{pasajeroAEliminar.name}</strong>?
+                        </p>
+
+                        <div className="passenger-confirm__actions">
+                            <button
+                                type="button"
+                                onClick={() => setPasajeroAEliminar(null)}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="passenger-confirm__delete"
+                                onClick={() => eliminarPasajero(pasajeroAEliminar)}
+                            >
+                                Eliminar pasajero
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </section>

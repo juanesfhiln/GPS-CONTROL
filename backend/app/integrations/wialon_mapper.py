@@ -89,7 +89,6 @@ def convertir_vehiculo(datos):
     latitud = numero_valido(posicion.get("y"))
     longitud = numero_valido(posicion.get("x"))
 
-    # Las dos coordenadas deben existir y ser válidas.
     if (
         latitud is None
         or longitud is None
@@ -106,15 +105,13 @@ def convertir_vehiculo(datos):
 
     if rumbo is not None:
         rumbo = int(rumbo) % 360
-        
-    rumbo_cardinal = obtener_rumbo_cardinal(rumbo)
 
+    rumbo_cardinal = obtener_rumbo_cardinal(rumbo)
     altitud = numero_valido(posicion.get("z"))
 
     fecha_posicion = convertir_fecha(posicion.get("t"))
     fecha_mensaje = convertir_fecha(ultimo_mensaje.get("t"))
 
-    # Sin coordenadas, no podemos considerar la posición reciente.
     if latitud is None or longitud is None:
         fecha_posicion = None
 
@@ -123,6 +120,11 @@ def convertir_vehiculo(datos):
         fecha_mensaje,
         fecha_posicion
     )
+
+    campos_personalizados = datos.get("flds") or {}
+
+    if not isinstance(campos_personalizados, dict):
+        campos_personalizados = {}
 
     return Vehicle(
         id=datos["id"],
@@ -135,7 +137,8 @@ def convertir_vehiculo(datos):
         altitude=altitud,
         position_time=fecha_posicion,
         last_message_time=fecha_mensaje,
-        status=estado
+        status=estado,
+        custom_fields=campos_personalizados
     )
 
 def convertir_conductor(datos):
