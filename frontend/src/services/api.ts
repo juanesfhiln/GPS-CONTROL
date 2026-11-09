@@ -1,5 +1,7 @@
 
-export const API_URL = "http://localhost:8000";
+const apiUrlConfigurada = import.meta.env.VITE_API_URL?.trim();
+
+export const API_URL = (apiUrlConfigurada || "http://localhost:8000").replace(/\/$/, "");
 
 export interface BackendResponse {
   status: string;

@@ -20,6 +20,7 @@ import type {
     Driver,
     DriverPayload
 } from "../features/drivers/types/driver";
+import { getAllDriversForExport, exportDriversToCSV } from "../features/drivers/services/driverExportService";
 
 function DriversPage() {
     const { usuario } = useAuth();
@@ -32,6 +33,7 @@ function DriversPage() {
 
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
+    const [exportando, setExportando] = useState(false);
     const [error, setError] = useState("");
     const [conductorAEliminar, setConductorAEliminar] = useState<Driver | null>(null);
 
@@ -196,6 +198,19 @@ function DriversPage() {
         }
     }
 
+    async function exportarConductores() {
+        try {
+            setExportando(true);
+            setError("");
+            const todos = await getAllDriversForExport(filtro);
+            exportDriversToCSV(todos);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "No fue posible exportar los conductores.");
+        } finally {
+            setExportando(false);
+        }
+    }
+
     function buscarConductores(evento: React.FormEvent<HTMLFormElement>) {
         evento.preventDefault();
 
@@ -212,9 +227,14 @@ function DriversPage() {
                 </div>
 
                 {puedeGestionar && (
-                    <button onClick={() => abrirFormulario()}>
-                        Nuevo conductor
-                    </button>
+                    <div>
+                        <button type="button" onClick={exportarConductores} disabled={exportando}>
+                            {exportando ? "Exportando..." : "Exportar CSV"}
+                        </button>
+                        <button type="button" onClick={() => abrirFormulario()}>
+                            Nuevo conductor
+                        </button>
+                    </div>
                 )}
             </header>
 

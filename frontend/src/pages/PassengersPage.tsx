@@ -19,6 +19,7 @@ import type {
     Passenger,
     PassengerPayload
 } from "../features/passengers/types/passenger";
+import { getAllPassengersForExport, exportPassengersToCSV } from "../features/passengers/services/passengerExportService";
 
 import "../features/passengers/styles/passengers.scss";
 
@@ -33,6 +34,7 @@ function PassengersPage() {
 
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
+    const [exportando, setExportando] = useState(false);
     const [guardandoAsignacion, setGuardandoAsignacion] = useState(false);
     const [pasajeroAEliminar, setPasajeroAEliminar] = useState<Passenger | null>(null);
 
@@ -206,6 +208,19 @@ function PassengersPage() {
         }
     }
 
+    async function exportarPasajeros() {
+        try {
+            setExportando(true);
+            setError("");
+            const todos = await getAllPassengersForExport(filtro);
+            exportPassengersToCSV(todos);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "No fue posible exportar los pasajeros.");
+        } finally {
+            setExportando(false);
+        }
+    }
+
     function buscarPasajeros(evento: SyntheticEvent<HTMLFormElement>) {
         evento.preventDefault();
         setPagina(1);
@@ -223,9 +238,14 @@ function PassengersPage() {
                 </div>
 
                 {puedeGestionar && (
-                    <button type="button" onClick={() => abrirFormulario()}>
-                        Nuevo pasajero
-                    </button>
+                    <div>
+                        <button type="button" onClick={exportarPasajeros} disabled={exportando}>
+                            {exportando ? "Exportando..." : "Exportar CSV"}
+                        </button>
+                        <button type="button" onClick={() => abrirFormulario()}>
+                            Nuevo pasajero
+                        </button>
+                    </div>
                 )}
             </header>
 

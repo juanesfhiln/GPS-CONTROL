@@ -18,6 +18,9 @@ DATABASE_URL = URL.create(
     host=os.getenv("DB_HOST"),
     port=int(os.getenv("DB_PORT", "5432")),
     database=os.getenv("DB_NAME"),
+    query={
+        "sslmode": os.getenv("DB_SSLMODE", "prefer")
+    }
 )
 
 # Crear el motor de conexión
@@ -33,7 +36,7 @@ SessionLocal = sessionmaker(
     autocommit=False
 )
 
-# Clase base para los modelos de la base de datos
+# Clase base para los modelos
 class Base(DeclarativeBase):
     pass
 
