@@ -134,7 +134,9 @@ function VehiclesPage() {
                                 <tr>
                                     <th>Identificador</th>
                                     <th>Vehículo</th>
-                                    <th>Estado</th>
+                                    <th>Movimiento</th>
+                                    <th>Comunicación</th>
+                                    <th>Estado GPS</th>
                                     <th>Velocidad</th>
                                     <th>Último mensaje</th>
                                     <th>Acciones</th>
@@ -147,9 +149,13 @@ function VehiclesPage() {
                                         <td>{vehiculo.id}</td>
                                         <td>{vehiculo.name}</td>
                                         <td>
-                                            <span className={`vehicles-page__status vehicles-page__status--${vehiculo.status.replace("ñ", "n")}`}>
-                                                {vehiculo.status.replaceAll("_", " ")}
-                                            </span>
+                                            {vehiculo.status.replaceAll("_", " ")}
+                                        </td>
+                                        <td>
+                                            {vehiculo.communication_status.replaceAll("_", " ")}
+                                        </td>
+                                        <td>
+                                            {vehiculo.position_status.replaceAll("_", " ")}
                                         </td>
                                         <td>{vehiculo.speed} km/h</td>
                                         <td>

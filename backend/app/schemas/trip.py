@@ -1,6 +1,13 @@
-
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class TripRoutePoint(BaseModel):
+    elapsed_seconds: int = Field(ge=0)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    speed: float = Field(ge=0)
 
 
 class TripResponse(BaseModel):
@@ -18,6 +25,7 @@ class TripResponse(BaseModel):
     end_longitude: float
     average_speed: float
     max_speed: float
+    route_points: list[TripRoutePoint]
     simulated: bool = True
 
 

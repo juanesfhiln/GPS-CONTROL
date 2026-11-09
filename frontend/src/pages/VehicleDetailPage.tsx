@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
@@ -6,19 +5,21 @@ import { useAuth } from "../features/auth/context/AuthContext";
 
 import {
     getVehicles,
-    updateVehicleCustomField
+    getVehicleCustomFields,
+    createVehicleCustomField,
+    updateVehicleCustomField,
+    deleteVehicleCustomField
 } from "../features/vehicles/services/vehicleService";
 
-import type {
-    Vehicle,
-    VehicleCustomField
-} from "../features/vehicles/types/vehicle";
+import type { Vehicle } from "../features/vehicles/types/vehicle";
 
 import { getDrivers } from "../features/drivers/services/driverService";
 import type { Driver } from "../features/drivers/types/driver";
 
 import { getPassengers } from "../features/passengers/services/passengerService";
 import type { Passenger } from "../features/passengers/types/passenger";
+
+import type { VehicleCustomField } from "../features/vehicles/services/vehicleService";
 
 import "../features/vehicles/styles/vehicle-detail.scss";
 
@@ -35,20 +36,56 @@ function VehicleDetailPage() {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const [conductorAsignado, setConductorAsignado] = useState<Driver | null>(null);
-    const [pasajerosAsignados, setPasajerosAsignados] = useState<Passenger[]>([]);
-    const [errorPasajeros, setErrorPasajeros] = useState<string | null>(null);
+    const [conductorAsignado, setConductorAsignado] =
+        useState<Driver | null>(null);
 
-    const [camposEditados, setCamposEditados] = useState<Record<string, CustomFieldDraft>>({});
-    const [campoGuardando, setCampoGuardando] = useState<string | null>(null);
-    const [mensajeCampos, setMensajeCampos] = useState<string | null>(null);
-    const [errorCampos, setErrorCampos] = useState<string | null>(null);
+    const [pasajerosAsignados, setPasajerosAsignados] =
+        useState<Passenger[]>([]);
 
-    const puedeEditar = usuario?.rol === "Administrador" || usuario?.rol === "Operador";
+    const [errorPasajeros, setErrorPasajeros] =
+        useState<string | null>(null);
 
+    const [camposPersonalizados, setCamposPersonalizados] =
+        useState<VehicleCustomField[]>([]);
+
+    const [camposEditados, setCamposEditados] =
+        useState<Record<string, CustomFieldDraft>>({});
+
+    const [campoGuardando, setCampoGuardando] =
+        useState<string | null>(null);
+
+    const [campoCreando, setCampoCreando] = useState(false);
+
+    const [campoEliminando, setCampoEliminando] =
+        useState<number | null>(null);
+
+    const [campoPendienteEliminar, setCampoPendienteEliminar] =
+        useState<number | null>(null);
+
+    const [nuevoCampo, setNuevoCampo] = useState({
+        nombre: "",
+        valor: ""
+    });
+
+    const [mensajeCampos, setMensajeCampos] =
+        useState<string | null>(null);
+
+    const [errorCampos, setErrorCampos] =
+        useState<string | null>(null);
+
+    const puedeEditar =
+        usuario?.rol === "Administrador" ||
+        usuario?.rol === "Operador";
+
+    // Cargar información del vehículo
     useEffect(() => {
+        let activo = true;
+
         async function cargarVehiculo() {
             try {
+                setCargando(true);
+                setError(null);
+
                 const respuesta = await getVehicles(1, 100);
 
                 const encontrado = respuesta.resultados.find(
@@ -56,65 +93,96 @@ function VehicleDetailPage() {
                 );
 
                 if (!encontrado) {
-                    setError("No se encontró el vehículo solicitado.");
+                    if (activo) {
+                        setError("No se encontró el vehículo solicitado.");
+                    }
                     return;
                 }
 
-                const respuestaConductores = await getDrivers(1, 100);
+                const [respuestaConductores, respuestaPasajeros] =
+                    await Promise.all([
+                        getDrivers(1, 100),
+                        getPassengers(1, 100).catch(() => null)
+                    ]);
+
+                if (!activo) return;
 
                 const conductor = respuestaConductores.resultados.find(
                     (item) => item.assigned_unit_id === encontrado.id
                 );
 
-                try {
-                    const respuestaPasajeros = await getPassengers(1, 100);
+                const asignados = respuestaPasajeros
+                    ? respuestaPasajeros.resultados.filter(
+                        (pasajero) =>
+                            pasajero.assigned_unit_id === encontrado.id
+                    )
+                    : [];
 
-                    const asignados = respuestaPasajeros.resultados.filter(
-                        (pasajero) => pasajero.assigned_unit_id === encontrado.id
-                    );
-
-                    setPasajerosAsignados(asignados);
-                    setErrorPasajeros(null);
-                } catch {
-                    setPasajerosAsignados([]);
-                    setErrorPasajeros("No fue posible cargar los pasajeros asignados.");
-                }
-
-                setConductorAsignado(conductor ?? null);
                 setVehiculo(encontrado);
+                setConductorAsignado(conductor ?? null);
+                setPasajerosAsignados(asignados);
 
-                const borradores: Record<string, CustomFieldDraft> = {};
-
-                Object.entries(encontrado.custom_fields ?? {}).forEach(
-                    ([campoId, campo]) => {
-                        borradores[campoId] = {
-                            nombre: campo.n ?? "",
-                            valor: campo.v ?? ""
-                        };
-                    }
+                setErrorPasajeros(
+                    respuestaPasajeros
+                        ? null
+                        : "No fue posible cargar los pasajeros asignados."
                 );
 
-                setCamposEditados(borradores);
+                try {
+                    const campos = await getVehicleCustomFields(encontrado.id);
 
+                    if (!activo) return;
+
+                    setCamposPersonalizados(campos);
+                    setCamposEditados({});
+                    setErrorCampos(null);
+                } catch {
+                    if (!activo) return;
+
+                    setCamposPersonalizados([]);
+                    setErrorCampos(
+                        "No fue posible consultar los campos personalizados."
+                    );
+                }
             } catch {
-                setError("No fue posible cargar la información del vehículo.");
+                if (activo) {
+                    setError(
+                        "No fue posible cargar la información del vehículo."
+                    );
+                }
             } finally {
-                setCargando(false);
+                if (activo) {
+                    setCargando(false);
+                }
             }
         }
 
         cargarVehiculo();
+
+        return () => {
+            activo = false;
+        };
     }, [id]);
 
+    // Actualizar borradores de campos
     function cambiarCampo(
         campoId: string,
         propiedad: keyof CustomFieldDraft,
         valor: string
     ) {
+        const campo = camposPersonalizados.find(
+            (item) => String(item.id) === campoId
+        );
+
+        if (!campo) return;
+
         setCamposEditados((actuales) => ({
             ...actuales,
             [campoId]: {
-                ...actuales[campoId],
+                ...(actuales[campoId] ?? {
+                    nombre: campo.nombre,
+                    valor: campo.valor
+                }),
                 [propiedad]: valor
             }
         }));
@@ -123,25 +191,34 @@ function VehicleDetailPage() {
         setErrorCampos(null);
     }
 
+    // Actualizar un campo personalizado
     async function guardarCampo(campoId: string) {
-        if (!vehiculo || !puedeEditar) {
-            return;
-        }
+        if (!vehiculo || !puedeEditar) return;
 
-        const borrador = camposEditados[campoId];
         const campoIdNumerico = Number(campoId);
 
-        if (
-            !borrador ||
-            !Number.isInteger(campoIdNumerico) ||
-            campoIdNumerico <= 0
-        ) {
-            setErrorCampos("Los datos del campo no son válidos.");
+        const campoOriginal = camposPersonalizados.find(
+            (item) => item.id === campoIdNumerico
+        );
+
+        if (!campoOriginal) {
+            setErrorCampos(
+                "No se encontró el campo que deseas actualizar."
+            );
             return;
         }
 
-        if (!borrador.nombre.trim()) {
-            setErrorCampos("El nombre del campo no puede estar vacío.");
+        const borrador = camposEditados[campoId] ?? {
+            nombre: campoOriginal.nombre,
+            valor: campoOriginal.valor
+        };
+
+        if (
+            !Number.isInteger(campoIdNumerico) ||
+            campoIdNumerico <= 0 ||
+            !borrador.nombre.trim()
+        ) {
+            setErrorCampos("Los datos del campo no son válidos.");
             return;
         }
 
@@ -153,32 +230,31 @@ function VehicleDetailPage() {
             await updateVehicleCustomField(
                 vehiculo.id,
                 campoIdNumerico,
-                borrador.nombre,
+                borrador.nombre.trim(),
                 borrador.valor
             );
 
-            setVehiculo((actual) => {
-                if (!actual) {
-                    return actual;
-                }
+            setCamposPersonalizados((actuales) =>
+                actuales.map((campo) =>
+                    campo.id === campoIdNumerico
+                        ? {
+                              ...campo,
+                              nombre: borrador.nombre.trim(),
+                              valor: borrador.valor
+                          }
+                        : campo
+                )
+            );
 
-                const camposActualizados: Record<string, VehicleCustomField> = {
-                    ...actual.custom_fields,
-                    [campoId]: {
-                        ...actual.custom_fields[campoId],
-                        n: borrador.nombre,
-                        v: borrador.valor
-                    }
-                };
-
-                return {
-                    ...actual,
-                    custom_fields: camposActualizados
-                };
+            setCamposEditados((actuales) => {
+                const copia = { ...actuales };
+                delete copia[campoId];
+                return copia;
             });
 
-            setMensajeCampos("Campo personalizado actualizado correctamente.");
-
+            setMensajeCampos(
+                "Campo personalizado actualizado correctamente."
+            );
         } catch (error) {
             setErrorCampos(
                 error instanceof Error
@@ -190,8 +266,103 @@ function VehicleDetailPage() {
         }
     }
 
+    // Crear un campo personalizado
+    async function crearCampo() {
+        if (!vehiculo || !puedeEditar) return;
+
+        const nombre = nuevoCampo.nombre.trim();
+
+        if (!nombre) {
+            setErrorCampos("El nombre del campo es obligatorio.");
+            return;
+        }
+
+        try {
+            setCampoCreando(true);
+            setMensajeCampos(null);
+            setErrorCampos(null);
+
+            await createVehicleCustomField(
+                vehiculo.id,
+                nombre,
+                nuevoCampo.valor
+            );
+
+            const campos = await getVehicleCustomFields(vehiculo.id);
+
+            setCamposPersonalizados(campos);
+            setCamposEditados({});
+
+            setNuevoCampo({
+                nombre: "",
+                valor: ""
+            });
+
+            setMensajeCampos(
+                "Campo personalizado creado correctamente."
+            );
+        } catch (error) {
+            setErrorCampos(
+                error instanceof Error
+                    ? error.message
+                    : "No fue posible crear el campo personalizado."
+            );
+        } finally {
+            setCampoCreando(false);
+        }
+    }
+
+    // Eliminar un campo personalizado
+    async function eliminarCampo(campoId: number) {
+        if (!vehiculo || !puedeEditar) return;
+
+        try {
+            setCampoEliminando(campoId);
+            setMensajeCampos(null);
+            setErrorCampos(null);
+
+            await deleteVehicleCustomField(vehiculo.id, campoId);
+
+            const campos = await getVehicleCustomFields(vehiculo.id);
+
+            setCamposPersonalizados(campos);
+
+            setCamposEditados((actuales) => {
+                const copia = { ...actuales };
+                delete copia[String(campoId)];
+                return copia;
+            });
+
+            setMensajeCampos(
+                "Campo personalizado eliminado correctamente."
+            );
+
+            setCampoPendienteEliminar(null);
+        } catch (error) {
+            setErrorCampos(
+                error instanceof Error
+                    ? error.message
+                    : "No fue posible eliminar el campo personalizado."
+            );
+        } finally {
+            setCampoEliminando(null);
+        }
+    }
+
+    // Cancelar eliminación
+    function cancelarEliminacion() {
+        if (campoEliminando !== null) return;
+
+        setCampoPendienteEliminar(null);
+        setErrorCampos(null);
+    }
+
     if (cargando) {
-        return <main className="vehicle-detail">Cargando vehículo...</main>;
+        return (
+            <main className="vehicle-detail">
+                Cargando vehículo...
+            </main>
+        );
     }
 
     if (error || !vehiculo) {
@@ -202,6 +373,10 @@ function VehicleDetailPage() {
         );
     }
 
+    const campoSeleccionado = camposPersonalizados.find(
+        (campo) => campo.id === campoPendienteEliminar
+    );
+
     return (
         <main className="vehicle-detail">
             <header className="vehicle-detail__header">
@@ -211,6 +386,7 @@ function VehicleDetailPage() {
                 </div>
             </header>
 
+            {/* Información general */}
             <section className="vehicle-detail__section">
                 <h2>Información general</h2>
 
@@ -222,9 +398,23 @@ function VehicleDetailPage() {
 
                     <article>
                         <span>Estado</span>
-                        <strong>{vehiculo.status.replace("_", " ")}</strong>
+                        <strong>
+                            {vehiculo.status.replace("_", " ")}
+                        </strong>
+                    </article>
+                    <article>
+                        <span>Comunicación</span>
+                        <strong>
+                            {vehiculo.communication_status.replaceAll("_", " ")}
+                        </strong>
                     </article>
 
+                    <article>
+                        <span>Estado GPS</span>
+                        <strong>
+                            {vehiculo.position_status.replaceAll("_", " ")}
+                        </strong>
+                    </article>
                     <article>
                         <span>Velocidad</span>
                         <strong>{vehiculo.speed} km/h</strong>
@@ -232,17 +422,23 @@ function VehicleDetailPage() {
 
                     <article>
                         <span>Rumbo</span>
-                        <strong>{vehiculo.heading_cardinal || "Sin información"}</strong>
+                        <strong>
+                            {vehiculo.heading_cardinal || "Sin información"}
+                        </strong>
                     </article>
 
                     <article>
                         <span>Latitud</span>
-                        <strong>{vehiculo.latitude ?? "Sin información"}</strong>
+                        <strong>
+                            {vehiculo.latitude ?? "Sin información"}
+                        </strong>
                     </article>
 
                     <article>
                         <span>Longitud</span>
-                        <strong>{vehiculo.longitude ?? "Sin información"}</strong>
+                        <strong>
+                            {vehiculo.longitude ?? "Sin información"}
+                        </strong>
                     </article>
 
                     <article>
@@ -259,109 +455,189 @@ function VehicleDetailPage() {
                         <strong>
                             {vehiculo.last_message_time
                                 ? new Date(
-                                    vehiculo.last_message_time
-                                ).toLocaleString("es-CO")
+                                      vehiculo.last_message_time
+                                  ).toLocaleString("es-CO")
                                 : "Sin información"}
                         </strong>
                     </article>
                 </div>
             </section>
 
+            {/* Campos personalizados */}
             <section className="vehicle-detail__section">
                 <h2>Campos personalizados</h2>
 
-                {Object.keys(vehiculo.custom_fields ?? {}).length > 0 ? (
-                    <>
-                        <div className="vehicle-detail__custom-fields">
-                            {Object.entries(vehiculo.custom_fields).map(
-                                ([campoId, campo]) => {
-                                    const borrador = camposEditados[campoId] ?? {
-                                        nombre: campo.n ?? "",
-                                        valor: campo.v ?? ""
-                                    };
+                {mensajeCampos && (
+                    <p className="vehicle-detail__success">
+                        {mensajeCampos}
+                    </p>
+                )}
 
-                                    return (
-                                        <article
-                                            className="vehicle-detail__custom-field"
-                                            key={campoId}
-                                        >
-                                            <span>Campo #{campoId}</span>
+                {errorCampos && campoPendienteEliminar === null && (
+                    <p className="vehicle-detail__error">
+                        {errorCampos}
+                    </p>
+                )}
 
-                                            {puedeEditar ? (
-                                                <>
-                                                    <label>
-                                                        Nombre
-                                                        <input
-                                                            type="text"
-                                                            value={borrador.nombre}
-                                                            onChange={(event) =>
-                                                                cambiarCampo(
-                                                                    campoId,
-                                                                    "nombre",
-                                                                    event.target.value
-                                                                )
-                                                            }
-                                                            maxLength={100}
-                                                        />
-                                                    </label>
+                {/* Formulario de creación */}
+                {puedeEditar && (
+                    <div className="vehicle-detail__custom-field">
+                        <h3>Agregar campo personalizado</h3>
 
-                                                    <label>
-                                                        Valor
-                                                        <input
-                                                            type="text"
-                                                            value={borrador.valor}
-                                                            onChange={(event) =>
-                                                                cambiarCampo(
-                                                                    campoId,
-                                                                    "valor",
-                                                                    event.target.value
-                                                                )
-                                                            }
-                                                        />
-                                                    </label>
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => guardarCampo(campoId)}
-                                                        disabled={campoGuardando !== null}
-                                                    >
-                                                        {campoGuardando === campoId
-                                                            ? "Guardando..."
-                                                            : "Guardar cambios"}
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>Nombre</span>
-                                                    <strong>{campo.n || "Sin nombre"}</strong>
-
-                                                    <span>Valor</span>
-                                                    <strong>{campo.v || "Sin valor"}</strong>
-                                                </>
-                                            )}
-                                        </article>
-                                    );
+                        <label>
+                            Nombre
+                            <input
+                                type="text"
+                                value={nuevoCampo.nombre}
+                                maxLength={100}
+                                placeholder="Nombre del campo"
+                                onChange={(event) =>
+                                    setNuevoCampo((actual) => ({
+                                        ...actual,
+                                        nombre: event.target.value
+                                    }))
                                 }
-                            )}
-                        </div>
+                            />
+                        </label>
 
-                        {mensajeCampos && (
-                            <p className="vehicle-detail__success">
-                                {mensajeCampos}
-                            </p>
-                        )}
+                        <label>
+                            Valor
+                            <input
+                                type="text"
+                                value={nuevoCampo.valor}
+                                placeholder="Valor del campo"
+                                onChange={(event) =>
+                                    setNuevoCampo((actual) => ({
+                                        ...actual,
+                                        valor: event.target.value
+                                    }))
+                                }
+                            />
+                        </label>
 
-                        {errorCampos && (
-                            <p className="vehicle-detail__error">
-                                {errorCampos}
-                            </p>
-                        )}
-                    </>
+                        <button
+                            type="button"
+                            onClick={crearCampo}
+                            disabled={campoCreando}
+                        >
+                            {campoCreando
+                                ? "Creando..."
+                                : "Agregar campo"}
+                        </button>
+                    </div>
+                )}
+
+                {/* Listado de campos */}
+                {camposPersonalizados.length > 0 ? (
+                    <div className="vehicle-detail__custom-fields">
+                        {camposPersonalizados.map((campo) => {
+                            const campoId = String(campo.id);
+
+                            const borrador = camposEditados[campoId] ?? {
+                                nombre: campo.nombre,
+                                valor: campo.valor
+                            };
+
+                            return (
+                                <article
+                                    className="vehicle-detail__custom-field"
+                                    key={campo.id}
+                                >
+                                    <span>Campo #{campo.id}</span>
+
+                                    {puedeEditar ? (
+                                        <>
+                                            <label>
+                                                Nombre
+                                                <input
+                                                    type="text"
+                                                    value={borrador.nombre}
+                                                    maxLength={100}
+                                                    onChange={(event) =>
+                                                        cambiarCampo(
+                                                            campoId,
+                                                            "nombre",
+                                                            event.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+
+                                            <label>
+                                                Valor
+                                                <input
+                                                    type="text"
+                                                    value={borrador.valor}
+                                                    onChange={(event) =>
+                                                        cambiarCampo(
+                                                            campoId,
+                                                            "valor",
+                                                            event.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    guardarCampo(campoId)
+                                                }
+                                                disabled={
+                                                    campoGuardando !== null ||
+                                                    campoEliminando !== null
+                                                }
+                                            >
+                                                {campoGuardando === campoId
+                                                    ? "Guardando..."
+                                                    : "Guardar cambios"}
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className="vehicle-detail__delete-button"
+                                                onClick={() => {
+                                                    setErrorCampos(null);
+                                                    setCampoPendienteEliminar(
+                                                        campo.id
+                                                    );
+                                                }}
+                                                disabled={
+                                                    campoEliminando !== null ||
+                                                    campoGuardando !== null
+                                                }
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Nombre</span>
+                                            <strong>
+                                                {campo.nombre || "Sin nombre"}
+                                            </strong>
+
+                                            <span>Valor</span>
+                                            <strong>
+                                                {campo.valor || "Sin valor"}
+                                            </strong>
+                                        </>
+                                    )}
+                                </article>
+                            );
+                        })}
+                    </div>
                 ) : (
-                    <p>Este vehículo no tiene campos personalizados registrados.</p>
+                    !errorCampos && (
+                        <p>
+                            Este vehículo no tiene campos personalizados
+                            registrados.
+                        </p>
+                    )
                 )}
             </section>
 
+            {/* Conductor asignado */}
             <section className="vehicle-detail__section">
                 <h2>Conductor asignado</h2>
 
@@ -379,19 +655,26 @@ function VehicleDetailPage() {
 
                         <article>
                             <span>Código</span>
-                            <strong>{conductorAsignado.code || "Sin información"}</strong>
+                            <strong>
+                                {conductorAsignado.code || "Sin información"}
+                            </strong>
                         </article>
 
                         <article>
                             <span>Teléfono</span>
-                            <strong>{conductorAsignado.phone || "Sin información"}</strong>
+                            <strong>
+                                {conductorAsignado.phone || "Sin información"}
+                            </strong>
                         </article>
                     </div>
                 ) : (
-                    <p>No hay un conductor asignado a este vehículo.</p>
+                    <p>
+                        No hay un conductor asignado a este vehículo.
+                    </p>
                 )}
             </section>
 
+            {/* Pasajeros asignados */}
             <section className="vehicle-detail__section">
                 <h2>Pasajeros asignados</h2>
 
@@ -408,10 +691,14 @@ function VehicleDetailPage() {
                                 <strong>{pasajero.id}</strong>
 
                                 <span>Código</span>
-                                <strong>{pasajero.code || "Sin información"}</strong>
+                                <strong>
+                                    {pasajero.code || "Sin información"}
+                                </strong>
 
                                 <span>Teléfono</span>
-                                <strong>{pasajero.phone || "Sin información"}</strong>
+                                <strong>
+                                    {pasajero.phone || "Sin información"}
+                                </strong>
 
                                 <span>Asignación</span>
                                 <strong>Asignado</strong>
@@ -419,9 +706,80 @@ function VehicleDetailPage() {
                         ))}
                     </div>
                 ) : (
-                    <p>No hay pasajeros asignados a este vehículo.</p>
+                    <p>
+                        No hay pasajeros asignados a este vehículo.
+                    </p>
                 )}
             </section>
+
+            {/* Modal de confirmación de eliminación */}
+            {campoPendienteEliminar !== null && (
+                <div
+                    className="vehicle-detail__modal-overlay"
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) {
+                            cancelarEliminacion();
+                        }
+                    }}
+                >
+                    <div
+                        className="vehicle-detail__modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="delete-modal-title"
+                        aria-describedby="delete-modal-description"
+                    >
+                        <h2 id="delete-modal-title">
+                            Confirmar eliminación
+                        </h2>
+
+                        <p id="delete-modal-description">
+                            ¿Estás seguro de que deseas eliminar el campo
+                            personalizado{" "}
+                            <strong>
+                                {campoSeleccionado?.nombre ||
+                                    `#${campoPendienteEliminar}`}
+                            </strong>
+                            ?
+                        </p>
+
+                        <p>
+                            Esta acción eliminará el campo del vehículo
+                            y no se puede deshacer.
+                        </p>
+
+                        {errorCampos && (
+                            <p className="vehicle-detail__modal-error">
+                                {errorCampos}
+                            </p>
+                        )}
+
+                        <div className="vehicle-detail__modal-actions">
+                            <button
+                                type="button"
+                                className="vehicle-detail__modal-cancel"
+                                onClick={cancelarEliminacion}
+                                disabled={campoEliminando !== null}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="vehicle-detail__modal-confirm"
+                                onClick={() =>
+                                    eliminarCampo(campoPendienteEliminar)
+                                }
+                                disabled={campoEliminando !== null}
+                            >
+                                {campoEliminando === campoPendienteEliminar
+                                    ? "Eliminando..."
+                                    : "Sí, eliminar"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

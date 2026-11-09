@@ -16,4 +16,6 @@ class Vehicle:
     position_time: Optional[datetime]
     last_message_time: Optional[datetime]
     status: str
+    communication_status: str = "sin_señal"
+    position_status: str = "sin_posicion"
     custom_fields: dict[str, Any] = field(default_factory=dict)

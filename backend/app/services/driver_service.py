@@ -35,14 +35,6 @@ class DriverService:
 
         conductores = recurso.get("drvrs", {})
 
-        for conductor in conductores.values():
-            
-            logger.warning(
-                "Conductor Wialon ID=%s, bu=%r",
-                conductor.get("id"),
-                conductor.get("bu")
-            )
-
         return [
             convertir_conductor(datos)
             for datos in conductores.values()

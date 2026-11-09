@@ -90,7 +90,7 @@ class WialonClient:
                     await self._renovar_sesion(sesion_anterior)
                     continue
 
-                if "error" in data:
+                if "error" in data and data["error"] != 0:
                     raise RuntimeError(
                         f"Error de Wialon en {servicio}: "
                         f"código {data['error']}"

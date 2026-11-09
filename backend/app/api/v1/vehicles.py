@@ -1,6 +1,7 @@
+
 import httpx
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 
 from app.api.dependencies import require_roles
 from app.schemas.vehicle import VehicleResponse, VehicleCustomFieldUpdate
@@ -75,8 +76,6 @@ async def listar_vehiculos(
     inicio = (pagina - 1) * limite
     fin = inicio + limite
 
-    vehiculos_paginados = vehiculos[inicio:fin]
-
     return {
         "total": total,
         "pagina": pagina,
@@ -84,9 +83,71 @@ async def listar_vehiculos(
         "total_paginas": (total + limite - 1) // limite,
         "resultados": [
             VehicleResponse.model_validate(v)
-            for v in vehiculos_paginados
+            for v in vehiculos[inicio:fin]
         ]
     }
+
+
+@router.get("/{unidad_id}/custom-fields")
+async def listar_campos_personalizados(
+    unidad_id: int,
+    usuario=Depends(
+        require_roles("Administrador", "Operador", "Visualizador")
+    )
+):
+    try:
+        return await vehicle_service.listar_campos_personalizados(
+            unidad_id=unidad_id
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=404,
+            detail=str(error)
+        )
+
+    except (RuntimeError, httpx.HTTPError):
+        raise HTTPException(
+            status_code=502,
+            detail="No fue posible consultar los campos en Wialon"
+        )
+
+
+@router.post(
+    "/{unidad_id}/custom-fields",
+    status_code=status.HTTP_201_CREATED
+)
+async def crear_campo_personalizado(
+    unidad_id: int,
+    datos: VehicleCustomFieldUpdate,
+    usuario=Depends(
+        require_roles("Administrador", "Operador")
+    )
+):
+    try:
+        resultado = await vehicle_service.crear_campo_personalizado(
+            unidad_id=unidad_id,
+            nombre=datos.nombre,
+            valor=datos.valor
+        )
+
+        return {
+            "mensaje": "Campo personalizado creado correctamente",
+            "resultado": resultado
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=404,
+            detail=str(error)
+        )
+
+    except (RuntimeError, httpx.HTTPError):
+        raise HTTPException(
+            status_code=502,
+            detail="No fue posible crear el campo en Wialon"
+        )
+
 
 @router.put("/{unidad_id}/custom-fields/{campo_id}")
 async def actualizar_campo_personalizado(
@@ -120,4 +181,36 @@ async def actualizar_campo_personalizado(
         raise HTTPException(
             status_code=502,
             detail="No fue posible actualizar el campo en Wialon"
+        )
+
+
+@router.delete("/{unidad_id}/custom-fields/{campo_id}")
+async def eliminar_campo_personalizado(
+    unidad_id: int,
+    campo_id: int,
+    usuario=Depends(
+        require_roles("Administrador", "Operador")
+    )
+):
+    try:
+        resultado = await vehicle_service.eliminar_campo_personalizado(
+            unidad_id=unidad_id,
+            campo_id=campo_id
+        )
+
+        return {
+            "mensaje": "Campo personalizado eliminado correctamente",
+            "resultado": resultado
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=404,
+            detail=str(error)
+        )
+
+    except (RuntimeError, httpx.HTTPError):
+        raise HTTPException(
+            status_code=502,
+            detail="No fue posible eliminar el campo en Wialon"
         )

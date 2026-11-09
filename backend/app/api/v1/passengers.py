@@ -100,7 +100,7 @@ async def crear_pasajero(
 
         audit_service.registrar(
             db=db,
-            usuario_id=usuario.id,
+            usuario_id=getattr(usuario, "id", None),
             accion="CREATE",
             modulo="PASAJEROS",
             descripcion=f"Creación del pasajero ID {pasajero_id}",
@@ -152,7 +152,7 @@ async def actualizar_pasajero(
 
         audit_service.registrar(
             db=db,
-            usuario_id=usuario.id,
+            usuario_id=getattr(usuario, "id", None),
             accion="UPDATE",
             modulo="PASAJEROS",
             descripcion=f"Actualización del pasajero ID {passenger_id}",
@@ -197,7 +197,7 @@ async def eliminar_pasajero(
 
         audit_service.registrar(
             db=db,
-            usuario_id=usuario.id,
+            usuario_id=getattr(usuario, "id", None),
             accion="DELETE",
             modulo="PASAJEROS",
             descripcion=f"Eliminación del pasajero ID {passenger_id}",
@@ -244,7 +244,7 @@ async def asignar_pasajero(
 
         audit_service.registrar(
             db=db,
-            usuario_id=usuario.id,
+            usuario_id=getattr(usuario, "id", None),
             accion="ASSIGN",
             modulo="PASAJEROS",
             descripcion=f"Asignación del pasajero ID {passenger_id} al vehículo ID {unit_id}",
@@ -292,7 +292,7 @@ async def desvincular_pasajero(
 
         audit_service.registrar(
             db=db,
-            usuario_id=usuario.id,
+            usuario_id=getattr(usuario, "id", None),
             accion="UNASSIGN",
             modulo="PASAJEROS",
             descripcion=f"Desvinculación del pasajero ID {passenger_id} del vehículo ID {unit_id}",

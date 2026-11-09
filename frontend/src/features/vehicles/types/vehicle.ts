@@ -16,6 +16,8 @@ export interface Vehicle {
     position_time: string | null;
     last_message_time: string | null;
     status: string;
+    communication_status: "conectado" | "sin_señal";
+    position_status: "actualizada" | "antigua" | "sin_posicion";
     custom_fields: Record<string, VehicleCustomField>;
 }
 

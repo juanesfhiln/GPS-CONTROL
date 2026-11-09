@@ -1,4 +1,3 @@
-
 .trips-page {
     padding: 2rem;
     min-height: 100%;
@@ -130,6 +129,171 @@
         }
     }
 
+    &__route-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+    }
+
+    &__section-header {
+        h2 {
+            margin: 0 0 0.4rem;
+            font-size: 1.2rem;
+        }
+
+        p {
+            margin: 0;
+            color: #777;
+            font-size: 0.9rem;
+        }
+    }
+
+    &__trip-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    &__trip-option {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        min-width: 160px;
+        padding: 0.85rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        text-align: left;
+        transition: border-color 0.2s, background 0.2s;
+
+        strong {
+            font-size: 0.95rem;
+        }
+
+        span,
+        small {
+            color: #777;
+            font-size: 0.8rem;
+        }
+
+        &:hover {
+            border-color: #1E8C93;
+        }
+
+        &--active {
+            border-color: #1E8C93;
+            background: #eaf5f5;
+
+            strong {
+                color: #176f75;
+            }
+        }
+    }
+
+    &__map-container {
+        width: 100%;
+        height: 440px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        isolation: isolate;
+    }
+
+    &__map {
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    &__playback {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.25rem;
+        background: #f8f8f8;
+        border: 1px solid #e9e9e9;
+        border-radius: 10px;
+    }
+
+    &__playback-info {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+
+        > div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+
+            span {
+                color: #777;
+                font-size: 0.8rem;
+            }
+
+            strong {
+                font-size: 1.05rem;
+            }
+        }
+    }
+
+    &__timeline {
+        width: 100%;
+        accent-color: #c62828;
+        cursor: pointer;
+
+        &:disabled {
+            cursor: not-allowed;
+        }
+    }
+
+    &__playback-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 40px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font-weight: 600;
+            cursor: pointer;
+
+            &:hover:not(:disabled) {
+                border-color: #c62828;
+                color: #c62828;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+
+        button:first-child {
+            background: #c62828;
+            border-color: #c62828;
+            color: #fff;
+
+            &:hover:not(:disabled) {
+                background: #a91f1f;
+            }
+        }
+    }
+
     &__table-container {
         overflow-x: auto;
         background: #fff;
@@ -167,6 +331,18 @@
         tbody tr:hover {
             background: #fafafa;
         }
+
+        tbody tr {
+            cursor: pointer;
+        }
+
+        .trips-page__table-row--selected {
+            background: #eaf5f5;
+
+            &:hover {
+                background: #e1f0f0;
+            }
+        }
     }
 }
 
@@ -192,6 +368,29 @@
 
         &__header h1 {
             font-size: 1.5rem;
+        }
+
+        &__route-section {
+            padding: 1rem;
+        }
+
+        &__map-container {
+            height: 320px;
+        }
+
+        &__playback-info {
+            grid-template-columns: 1fr;
+        }
+
+        &__playback-controls {
+            button {
+                flex: 1;
+            }
+        }
+
+        &__trip-option {
+            flex: 1;
+            min-width: 130px;
         }
     }
 }

@@ -57,24 +57,36 @@ def obtener_rumbo_cardinal(rumbo):
 
     return direcciones[indice]
 
-def obtener_estado(velocidad, ultima_fecha, fecha_posicion):
-    if ultima_fecha is None or fecha_posicion is None:
+def obtener_estado_comunicacion(ultima_fecha):
+    if ultima_fecha is None:
         return "sin_señal"
 
     ahora = datetime.now(timezone.utc)
 
-    antiguedad_mensaje = (
-        ahora - ultima_fecha
-    ).total_seconds()
+    antiguedad = (ahora - ultima_fecha).total_seconds()
 
-    antiguedad_posicion = (
-        ahora - fecha_posicion
-    ).total_seconds()
-
-    if antiguedad_mensaje > TIEMPO_SIN_SENAL:
+    if antiguedad > TIEMPO_SIN_SENAL:
         return "sin_señal"
 
-    if antiguedad_posicion > TIEMPO_SIN_SENAL:
+    return "conectado"
+
+
+def obtener_estado_posicion(fecha_posicion):
+    if fecha_posicion is None:
+        return "sin_posicion"
+
+    ahora = datetime.now(timezone.utc)
+
+    antiguedad = (ahora - fecha_posicion).total_seconds()
+
+    if antiguedad > TIEMPO_SIN_SENAL:
+        return "antigua"
+
+    return "actualizada"
+
+
+def obtener_estado(velocidad, estado_posicion):
+    if estado_posicion != "actualizada":
         return "sin_señal"
 
     if velocidad > VELOCIDAD_MINIMA:
@@ -115,10 +127,12 @@ def convertir_vehiculo(datos):
     if latitud is None or longitud is None:
         fecha_posicion = None
 
+    comunicacion = obtener_estado_comunicacion(fecha_mensaje)
+    posicion_estado = obtener_estado_posicion(fecha_posicion)
+
     estado = obtener_estado(
         velocidad,
-        fecha_mensaje,
-        fecha_posicion
+        posicion_estado
     )
 
     campos_personalizados = datos.get("flds") or {}
@@ -138,6 +152,8 @@ def convertir_vehiculo(datos):
         position_time=fecha_posicion,
         last_message_time=fecha_mensaje,
         status=estado,
+        communication_status=comunicacion,
+        position_status=posicion_estado,
         custom_fields=campos_personalizados
     )
 

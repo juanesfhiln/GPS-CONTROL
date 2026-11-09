@@ -17,6 +17,8 @@ class VehicleResponse(BaseModel):
     position_time: Optional[datetime]
     last_message_time: Optional[datetime]
     status: str
+    communication_status: str
+    position_status: str
     custom_fields: dict[str, Any] = Field(default_factory=dict)
 
 class VehicleCustomFieldUpdate(BaseModel):

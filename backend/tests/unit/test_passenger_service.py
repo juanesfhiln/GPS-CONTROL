@@ -436,3 +436,235 @@ def test_eliminar_pasajero_inexistente():
         cliente.actualizar_pasajero.assert_not_awaited()
 
     asyncio.run(ejecutar())
+
+@pytest.mark.parametrize("datos", [None, [], "incorrecto", 123])
+def test_obtener_pasajeros_rechaza_tags_invalidos(datos):
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        cliente.get_resources.return_value = [
+            {"id": RESOURCE_ID, "tags": datos}
+        ]
+
+        with pytest.raises(RuntimeError, match="estructura inesperada"):
+            await servicio.obtener_pasajeros()
+
+    asyncio.run(ejecutar())
+
+
+def test_crear_pasajero_rechaza_telefono_duplicado():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        configurar_pasajeros(cliente, [
+            {
+                "id": 101,
+                "n": "Juan",
+                "c": "PAS-001",
+                "p": "3001234567",
+                "bu": 0,
+                "jp": {}
+            }
+        ])
+
+        with pytest.raises(ValueError, match="teléfono"):
+            await servicio.crear_pasajero(
+                nombre="Ana",
+                telefono="3001234567"
+            )
+
+        cliente.actualizar_pasajero.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+@pytest.mark.parametrize(
+    "campos",
+    [
+        ["incorrecto"],
+        {"": "valor"},
+        {"Área": 123},
+        {"_telefono": "3001234567"}
+    ]
+)
+def test_crear_pasajero_rechaza_campos_personalizados_invalidos(campos):
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+
+        with pytest.raises(ValueError):
+            await servicio.crear_pasajero(
+                nombre="Ana",
+                campos_personalizados=campos
+            )
+
+        cliente.actualizar_pasajero.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_crear_pasajero_rechaza_respuesta_invalida():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        configurar_pasajeros(cliente, [])
+        cliente.actualizar_pasajero.return_value = {"id": 201}
+
+        with pytest.raises(RuntimeError, match="respuesta inesperada"):
+            await servicio.crear_pasajero("Ana")
+
+    asyncio.run(ejecutar())
+
+
+def test_actualizar_pasajero_rechaza_id_invalido():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+
+        with pytest.raises(ValueError, match="ID"):
+            await servicio.actualizar_pasajero(0, "Ana")
+
+        cliente.get_resources.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_actualizar_pasajero_rechaza_codigo_duplicado():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        configurar_pasajeros(cliente, [
+            {
+                "id": 101, "n": "Juan", "c": "PAS-001",
+                "bu": 0, "jp": {}
+            },
+            {
+                "id": 102, "n": "Ana", "c": "PAS-002",
+                "bu": 0, "jp": {}
+            }
+        ])
+
+        with pytest.raises(ValueError, match="otro pasajero con ese código"):
+            await servicio.actualizar_pasajero(
+                101, "Juan", codigo="pas-002"
+            )
+
+        cliente.actualizar_pasajero.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_actualizar_pasajero_rechaza_telefono_duplicado():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        configurar_pasajeros(cliente, [
+            {
+                "id": 101, "n": "Juan", "p": "3001111111",
+                "bu": 0, "jp": {}
+            },
+            {
+                "id": 102, "n": "Ana", "p": "3002222222",
+                "bu": 0, "jp": {}
+            }
+        ])
+
+        with pytest.raises(ValueError, match="otro pasajero con ese teléfono"):
+            await servicio.actualizar_pasajero(
+                101, "Juan", telefono="3002222222"
+            )
+
+        cliente.actualizar_pasajero.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_actualizar_pasajero_rechaza_respuesta_invalida():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        configurar_pasajeros(cliente, [
+            {"id": 101, "n": "Juan", "bu": 0, "jp": {}}
+        ])
+        cliente.actualizar_pasajero.return_value = [102, {}]
+
+        with pytest.raises(RuntimeError, match="respuesta inesperada"):
+            await servicio.actualizar_pasajero(101, "Juan")
+
+    asyncio.run(ejecutar())
+
+
+def test_actualizar_pasajero_rechaza_campos_personalizados_invalidos():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+
+        with pytest.raises(ValueError, match="diccionario"):
+            await servicio.actualizar_pasajero(
+                101, "Juan", campos_personalizados=["incorrecto"]
+            )
+
+        cliente.get_resources.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_eliminar_pasajero_rechaza_id_invalido():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+
+        with pytest.raises(ValueError, match="ID"):
+            await servicio.eliminar_pasajero(0)
+
+        cliente.get_resources.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_eliminar_pasajero_rechaza_respuesta_invalida():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        configurar_pasajeros(cliente, [
+            {"id": 101, "n": "Juan", "bu": 0, "jp": {}}
+        ])
+        cliente.actualizar_pasajero.return_value = [101, {}]
+
+        with pytest.raises(RuntimeError, match="respuesta inesperada"):
+            await servicio.eliminar_pasajero(101)
+
+    asyncio.run(ejecutar())
+
+
+@pytest.mark.parametrize(
+    "passenger_id,unit_id",
+    [(0, 100), (100, 0), (-1, 100), (100, -1)]
+)
+def test_asignar_pasajero_rechaza_ids_invalidos(
+    passenger_id, unit_id
+):
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+
+        with pytest.raises(ValueError, match="ID"):
+            await servicio.asignar_pasajero(passenger_id, unit_id)
+
+        cliente.get_resources.assert_not_awaited()
+        cliente.vincular_pasajero.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_desvincular_pasajero_inexistente():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+        configurar_pasajeros(cliente, [])
+
+        with pytest.raises(ValueError, match="no existe"):
+            await servicio.desvincular_pasajero(999, 100)
+
+        cliente.vincular_pasajero.assert_not_awaited()
+
+    asyncio.run(ejecutar())
+
+
+def test_desvincular_pasajero_rechaza_ids_invalidos():
+    async def ejecutar():
+        servicio, cliente = crear_servicio()
+
+        with pytest.raises(ValueError, match="ID"):
+            await servicio.desvincular_pasajero(0, 100)
+
+        cliente.get_resources.assert_not_awaited()
+
+    asyncio.run(ejecutar())

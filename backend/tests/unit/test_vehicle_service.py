@@ -1,6 +1,7 @@
-
 import asyncio
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from app.services.vehicle_service import VehicleService
 
@@ -10,12 +11,7 @@ def test_obtener_vehiculos_correctamente():
         servicio = VehicleService()
 
         servicio.wialon_client.get_units = AsyncMock(
-            return_value=[
-                {
-                    "id": 1,
-                    "nm": "Vehículo de prueba"
-                }
-            ]
+            return_value=[{"id": 1, "nm": "Vehículo de prueba"}]
         )
 
         with patch(
@@ -37,9 +33,7 @@ def test_obtener_vehiculos_utiliza_cache():
     async def ejecutar():
         servicio = VehicleService()
 
-        servicio.wialon_client.get_units = AsyncMock(
-            return_value=[]
-        )
+        servicio.wialon_client.get_units = AsyncMock(return_value=[])
 
         primera_consulta = await servicio.obtener_vehiculos()
         segunda_consulta = await servicio.obtener_vehiculos()
@@ -54,9 +48,7 @@ def test_obtener_vehiculos_actualiza_cache():
     async def ejecutar():
         servicio = VehicleService()
 
-        servicio.wialon_client.get_units = AsyncMock(
-            return_value=[]
-        )
+        servicio.wialon_client.get_units = AsyncMock(return_value=[])
 
         with patch(
             "app.services.vehicle_service.time.monotonic",
@@ -78,10 +70,51 @@ def test_obtener_vehiculos_propagacion_error_wialon():
             side_effect=RuntimeError("Error de conexión")
         )
 
-        try:
+        with pytest.raises(RuntimeError, match="Error de conexión"):
             await servicio.obtener_vehiculos()
-            assert False, "Se esperaba RuntimeError"
-        except RuntimeError as error:
-            assert str(error) == "Error de conexión"
+
+    asyncio.run(ejecutar())
+
+
+@pytest.mark.parametrize("respuesta", [None, {}, "incorrecto", 123])
+def test_obtener_vehiculos_rechaza_respuesta_invalida(respuesta):
+    async def ejecutar():
+        servicio = VehicleService()
+        servicio.wialon_client.get_units = AsyncMock(
+            return_value=respuesta
+        )
+
+        with pytest.raises(RuntimeError, match="respuesta de vehículos inválida"):
+            await servicio.obtener_vehiculos()
+
+    asyncio.run(ejecutar())
+
+
+@pytest.mark.parametrize(
+    "respuesta",
+    [[None], ["incorrecto"], [123], [{"id": 1}, None]]
+)
+def test_obtener_vehiculos_rechaza_elementos_invalidos(respuesta):
+    async def ejecutar():
+        servicio = VehicleService()
+        servicio.wialon_client.get_units = AsyncMock(
+            return_value=respuesta
+        )
+
+        with pytest.raises(RuntimeError, match="datos de vehículos inválidos"):
+            await servicio.obtener_vehiculos()
+
+    asyncio.run(ejecutar())
+
+
+def test_obtener_vehiculos_propaga_error_de_conexion():
+    async def ejecutar():
+        servicio = VehicleService()
+        servicio.wialon_client.get_units = AsyncMock(
+            side_effect=ConnectionError("Wialon no disponible")
+        )
+
+        with pytest.raises(ConnectionError, match="Wialon no disponible"):
+            await servicio.obtener_vehiculos()
 
     asyncio.run(ejecutar())

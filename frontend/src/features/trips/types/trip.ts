@@ -1,3 +1,9 @@
+export interface TripRoutePoint {
+    elapsed_seconds: number;
+    latitude: number;
+    longitude: number;
+    speed: number;
+}
 
 export interface Trip {
     id: string;
@@ -12,6 +18,7 @@ export interface Trip {
     end_longitude: number;
     average_speed: number;
     max_speed: number;
+    route_points: TripRoutePoint[];
     simulated: boolean;
 }
 
