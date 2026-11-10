@@ -84,8 +84,8 @@ def test_obtener_historial_ignora_viaje_sin_datos_validos():
                 "trips": [
                     {"from": {"t": "no-fecha"}, "to": {"t": 1600}, "m": 1000},
                     {
-                        "from": {"t": 1000, "i": 0},
-                        "to": {"t": 1600, "i": 1},
+                        "from": {"t": 1000},
+                        "to": {"t": 1600},
                         "m": 1000
                     }
                 ],
