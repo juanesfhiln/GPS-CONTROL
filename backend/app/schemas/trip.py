@@ -36,4 +36,4 @@ class TripHistoryResponse(BaseModel):
     fecha_fin: datetime
     total_viajes: int
     viajes: list[TripResponse]
-    simulated: bool = True
+    simulated: bool = False
