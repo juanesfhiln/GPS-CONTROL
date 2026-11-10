@@ -497,6 +497,10 @@ class WialonClient:
         # consulta de viajes deben ejecutarse en secuencia y sin solaparse
         # con otra consulta de historial.
         async with self._trip_history_lock:
+            # El cargador de mensajes es compartido por la sesión Wialon.
+            # Se limpia antes de cargar otro intervalo.
+            await self._consultar("messages/unload", {})
+
             carga = await self._consultar(
                 "messages/load_interval",
                 {
