@@ -14,7 +14,7 @@
 - **Conductores:** permite consultar conductores y, según el rol, crear, editar, eliminar y asignar o desvincular conductores de vehículos.
 - **Pasajeros:** permite consultar pasajeros y, según el rol, administrar sus datos y asignaciones.
 - **Mapa:** muestra la ubicación de los vehículos disponibles desde la integración.
-- **Historial de viajes:** permite consultar y visualizar recorridos para una unidad y un intervalo. En esta versión los recorridos son demostrativos/simulados; la respuesta de API los marca como simulados.
+- **Historial de viajes:** permite consultar los recorridos históricos disponibles en Wialon para una unidad y un intervalo. La pantalla presenta los viajes, sus fechas y distancias, la ruta en el mapa y los controles de reproducción con indicadores de velocidad, tiempo y distancia. La disponibilidad depende de los datos históricos y permisos de Wialon. Si el intervalo contiene más de 10.000 mensajes, reduce el rango de fechas y vuelve a consultar.
 - **Usuarios:** permite al administrador gestionar usuarios, roles, estado y restablecimiento de contraseña.
 - **Auditoría:** permite al administrador consultar los registros de auditoría.
 
@@ -41,5 +41,5 @@ Los permisos se validan en el backend. Ocultar una opción en la interfaz no sus
 - No compartas credenciales ni dejes una sesión abierta en equipos compartidos.
 - Verifica la unidad seleccionada antes de modificar campos o asignaciones.
 - Confirma los datos antes de eliminar registros en Wialon.
-- No utilices el historial simulado como evidencia de recorridos reales.
+- Verifica que el vehículo y el intervalo seleccionados correspondan a la consulta que necesitas. Si no aparecen viajes, comprueba que existan mensajes históricos en Wialon para ese periodo.
 - Reporta al administrador errores de conexión, datos desactualizados o permisos inesperados.
