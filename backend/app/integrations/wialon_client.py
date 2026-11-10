@@ -20,6 +20,7 @@ class WialonClient:
 
         self.session_id = None
         self._session_lock = asyncio.Lock()
+        self._trip_history_lock = asyncio.Lock()
         self._http_client = None
 
         if not self.api_url or not self.token:
@@ -486,30 +487,58 @@ class WialonClient:
 
     
     async def get_unit_trips(self, unit_id: int, time_from: int, time_to: int):
-        if unit_id <= 0:
+        if isinstance(unit_id, bool) or not isinstance(unit_id, int) or unit_id <= 0:
             raise ValueError("El ID del vehículo no es válido")
 
         if time_from <= 0 or time_to <= time_from:
             raise ValueError("El intervalo de fechas no es válido")
 
-        await self._consultar(
-            "messages/load_interval",
-            {
-                "itemId": unit_id,
-                "timeFrom": time_from,
-                "timeTo": time_to,
-                "flags": 0,
-                "flagsMask": 65280,
-                "loadCount": 4294967295
-            }
-        )
+        # Wialon utiliza un cargador de mensajes por sesión. La carga y la
+        # consulta de viajes deben ejecutarse en secuencia y sin solaparse
+        # con otra consulta de historial.
+        async with self._trip_history_lock:
+            carga = await self._consultar(
+                "messages/load_interval",
+                {
+                    "itemId": unit_id,
+                    "timeFrom": time_from,
+                    "timeTo": time_to,
+                    "flags": 1,
+                    "flagsMask": 65281,
+                    "loadCount": 10000
+                }
+            )
 
-        return await self._consultar(
-            "unit/get_trips",
-            {
-                "itemId": unit_id,
-                "msgsSource": "1",
-                "timeFrom": time_from,
-                "timeTo": time_to
+            if not isinstance(carga, dict):
+                raise RuntimeError("Wialon devolvió una carga de mensajes inválida")
+
+            mensajes = carga.get("messages", [])
+            cantidad = carga.get("count", len(mensajes))
+
+            if not isinstance(mensajes, list):
+                raise RuntimeError("Wialon devolvió mensajes en un formato inválido")
+
+            if cantidad > len(mensajes):
+                raise ValueError(
+                    "El intervalo contiene demasiados mensajes para una consulta. "
+                    "Reduce el rango de fechas e inténtalo de nuevo."
+                )
+
+            viajes = await self._consultar(
+                "unit/get_trips",
+                {
+                    "itemId": unit_id,
+                    "msgsSource": "1",
+                    "timeFrom": time_from,
+                    "timeTo": time_to
+                }
+            )
+
+            if not isinstance(viajes, list):
+                raise RuntimeError("Wialon devolvió un historial de viajes inválido")
+
+            return {
+                "trips": viajes,
+                "messages": mensajes,
+                "message_count": cantidad
             }
-        )
