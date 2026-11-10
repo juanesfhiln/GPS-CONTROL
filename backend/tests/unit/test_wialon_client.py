@@ -216,3 +216,88 @@ def test_gestionar_campo_personalizado_envia_parametros(
             await cliente.cerrar()
 
     asyncio.run(ejecutar())
+
+def test_get_unit_trips_carga_mensajes_y_consulta_viajes(monkeypatch):
+    async def ejecutar():
+        solicitudes = []
+
+        def handler(request):
+            servicio = request.url.params["svc"]
+            parametros = request.url.params.get("params")
+            solicitudes.append((servicio, json.loads(parametros or "{}")))
+
+            if servicio == "token/login":
+                return httpx.Response(200, json={"eid": "sesion-123"})
+            if servicio == "messages/unload":
+                return httpx.Response(200, json=1)
+            if servicio == "messages/load_interval":
+                return httpx.Response(200, json={
+                    "count": 2,
+                    "messages": [
+                        {"t": 100, "pos": {"y": 4.6, "x": -74.1, "s": 10}},
+                        {"t": 200, "pos": {"y": 4.7, "x": -74.2, "s": 20}}
+                    ]
+                })
+            if servicio == "unit/get_trips":
+                return httpx.Response(200, json=[{"from": {"i": 0}, "to": {"i": 1}, "m": 1000}])
+            return httpx.Response(200, json={"error": 2})
+
+        cliente = crear_cliente(monkeypatch, handler)
+
+        try:
+            resultado = await cliente.get_unit_trips(957, 100, 200)
+
+            assert resultado["message_count"] == 2
+            assert len(resultado["messages"]) == 2
+            assert len(resultado["trips"]) == 1
+            assert [servicio for servicio, _ in solicitudes] == [
+                "token/login",
+                "messages/unload",
+                "messages/load_interval",
+                "unit/get_trips"
+            ]
+            parametros_carga = solicitudes[2][1]
+            assert parametros_carga == {
+                "itemId": 957,
+                "timeFrom": 100,
+                "timeTo": 200,
+                "flags": 1,
+                "flagsMask": 65281,
+                "loadCount": 10000
+            }
+        finally:
+            await cliente.cerrar()
+
+    asyncio.run(ejecutar())
+
+
+def test_get_unit_trips_rechaza_intervalo_que_supera_limite(monkeypatch):
+    async def ejecutar():
+        servicios = []
+
+        def handler(request):
+            servicio = request.url.params["svc"]
+            servicios.append(servicio)
+
+            if servicio == "token/login":
+                return httpx.Response(200, json={"eid": "sesion-123"})
+            if servicio == "messages/unload":
+                return httpx.Response(200, json=1)
+            if servicio == "messages/load_interval":
+                return httpx.Response(200, json={
+                    "count": 10001,
+                    "messages": [{"t": 100, "pos": {"y": 4.6, "x": -74.1}}] * 10000
+                })
+            return httpx.Response(200, json=[])
+
+        cliente = crear_cliente(monkeypatch, handler)
+
+        try:
+            with pytest.raises(ValueError, match="demasiados mensajes"):
+                await cliente.get_unit_trips(957, 100, 200)
+
+            assert "unit/get_trips" not in servicios
+        finally:
+            await cliente.cerrar()
+
+    asyncio.run(ejecutar())
