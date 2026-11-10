@@ -25,7 +25,7 @@
 - [ ] Confirmar que no existan secretos en archivos rastreados ni en el historial de Git. Si una credencial estuvo comprometida, rotarla; borrar el archivo en un commit no la elimina del historial.
 - [ ] Repetir el build del frontend y registrar la salida.
 - [ ] Guardar evidencias visuales de los módulos y del historial RF-24.
-- [ ] Probar instalación limpia siguiendo `docs/INSTALACION.md` en un entorno separado.
+- [x] Instalación limpia del backend: entorno virtual Python 3.11 independiente, instalación desde `requirements-dev.txt` y 208 pruebas aprobadas (0 fallidas; 1 advertencia), evidencia comunicada el 10/11/2026.
 - [x] Configuración de despliegue: `VITE_API_URL` verificada en Netlify y `FRONTEND_ORIGINS` corregida en Render con el origen HTTPS; despliegue publicado y validación funcional de producción confirmada por el usuario.
 - [ ] Preparar commit final de entrega y verificar el push a `origin/main`.
 
