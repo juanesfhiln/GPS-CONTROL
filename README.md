@@ -59,7 +59,7 @@ Los resultados de validación registrados para esta versión están en [`docs/IN
 - Generar una `JWT_SECRET_KEY` propia y robusta para cada entorno.
 - Configurar `FRONTEND_ORIGINS` con los orígenes reales del frontend.
 - En producción, utilizar HTTPS y `COOKIE_SECURE=true`; revisar también `COOKIE_SAMESITE` según el dominio y la arquitectura de despliegue.
-- El frontend define actualmente `API_URL` como `http://localhost:8000` en `frontend/src/services/api.ts`. Para desplegar en otro host, debe ajustarse esa dirección o configurarse una estrategia de proxy compatible.
+- El frontend lee `VITE_API_URL` en `frontend/src/services/api.ts` y utiliza `http://localhost:8000` como valor predeterminado cuando la variable no está definida. Configurar `VITE_API_URL` con la URL del backend en cada entorno de despliegue.
 - La integración de Wialon depende de credenciales y recursos válidos. La disponibilidad real de datos depende de la cuenta y permisos configurados en Wialon.
 - El historial de viajes consulta datos de Wialon. La disponibilidad y cobertura dependen de los permisos, datos históricos y límites de mensajes de la cuenta configurada. Los intervalos con más de 10.000 mensajes deben reducirse; la paginación automática de intervalos todavía no está implementada.
 
