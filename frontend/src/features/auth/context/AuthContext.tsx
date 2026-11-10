@@ -10,7 +10,8 @@ import {
 import {
   login as loginService,
   logout as logoutService,
-  getCurrentUser
+  getCurrentUser,
+  recuperarTokenCSRF
 } from "../services/authService";
 
 import type {
@@ -43,6 +44,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async function restaurarSesion() {
       try {
         const usuarioActual = await getCurrentUser();
+
+        await recuperarTokenCSRF();
 
         if (activo) {
           setUsuario(usuarioActual);

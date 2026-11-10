@@ -1,25 +1,23 @@
 
 const apiUrlConfigurada = import.meta.env.VITE_API_URL?.trim();
 
-export const API_URL = (apiUrlConfigurada || "http://localhost:8000").replace(/\/$/, "");
+export const API_URL = (
+  apiUrlConfigurada || "http://localhost:8000"
+).replace(/\/$/, "");
 
-export interface BackendResponse {
-  status: string;
-  mensaje: string;
-}
+let csrfTokenEnMemoria: string | null = null;
 
-function obtenerTokenCSRF(): string | null {
-  const cookie = document.cookie
-    .split("; ")
-    .find((fila) => fila.startsWith("csrf_token="));
-
-  return cookie
-    ? decodeURIComponent(cookie.split("=").slice(1).join("="))
-    : null;
+export function establecerTokenCSRF(token: string | null): void {
+  csrfTokenEnMemoria = token;
 }
 
 interface ApiOptions extends RequestInit {
   headers?: HeadersInit;
+}
+
+export interface BackendResponse {
+  status: string;
+  mensaje: string;
 }
 
 export async function apiFetch<T>(
@@ -27,7 +25,6 @@ export async function apiFetch<T>(
   opciones: ApiOptions = {}
 ): Promise<T> {
   const metodo = (opciones.method ?? "GET").toUpperCase();
-
   const headers = new Headers(opciones.headers);
 
   if (opciones.body && !headers.has("Content-Type")) {
@@ -35,10 +32,8 @@ export async function apiFetch<T>(
   }
 
   if (!["GET", "HEAD", "OPTIONS"].includes(metodo)) {
-    const csrfToken = obtenerTokenCSRF();
-
-    if (csrfToken) {
-      headers.set("X-CSRF-Token", csrfToken);
+    if (csrfTokenEnMemoria) {
+      headers.set("X-CSRF-Token", csrfTokenEnMemoria);
     }
   }
 

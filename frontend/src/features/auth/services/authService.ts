@@ -1,34 +1,49 @@
 
-import { apiFetch } from "../../../services/api";
+import {
+  apiFetch,
+  establecerTokenCSRF
+} from "../../../services/api";
 
 import type {
   LoginRequest,
+  LoginResponse,
   AuthUser
 } from "../types/auth";
-
-export interface LoginResponse {
-  usuario: string;
-  correo: string;
-  rol: string;
-}
 
 export async function login(
   datos: LoginRequest
 ): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>("/api/v1/auth/login", {
-    method: "POST",
-    body: JSON.stringify(datos),
-  });
+  const resultado = await apiFetch<LoginResponse>(
+    "/api/v1/auth/login",
+    {
+      method: "POST",
+      body: JSON.stringify(datos),
+    }
+  );
+
+  establecerTokenCSRF(resultado.csrf_token);
+
+  return resultado;
 }
 
 export async function getCurrentUser(): Promise<AuthUser> {
   return apiFetch<AuthUser>("/api/v1/auth/me");
 }
 
+export async function recuperarTokenCSRF(): Promise<void> {
+  const resultado = await apiFetch<{ csrf_token: string }>(
+    "/api/v1/auth/csrf"
+  );
+
+  establecerTokenCSRF(resultado.csrf_token);
+}
+
 export async function logout(): Promise<void> {
   await apiFetch<void>("/api/v1/auth/logout", {
     method: "POST",
   });
+
+  establecerTokenCSRF(null);
 }
 
 export interface PasswordChangeRequest {
@@ -39,9 +54,16 @@ export interface PasswordChangeRequest {
 
 export async function cambiarPassword(
   datos: PasswordChangeRequest
-): Promise<{ mensaje: string }> {
-  return apiFetch<{ mensaje: string }>("/api/v1/auth/change-password", {
+): Promise<{ mensaje: string; csrf_token: string }> {
+  const resultado = await apiFetch<{
+    mensaje: string;
+    csrf_token: string;
+  }>("/api/v1/auth/change-password", {
     method: "POST",
-    body: JSON.stringify(datos)
+    body: JSON.stringify(datos),
   });
+
+  establecerTokenCSRF(resultado.csrf_token);
+
+  return resultado;
 }

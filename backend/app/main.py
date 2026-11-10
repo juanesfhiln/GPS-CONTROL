@@ -18,10 +18,7 @@ async def lifespan(app: FastAPI):
     # Cerrar conexión con Wialon
     await vehicle_service.wialon_client.cerrar()
 
-app = FastAPI(
-    lifespan=lifespan,
-    docs_url=None
-)
+app = FastAPI(lifespan=lifespan, docs_url=None)
 
 @app.get("/docs", include_in_schema=False)
 async def swagger_documentacion():

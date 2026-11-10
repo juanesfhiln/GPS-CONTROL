@@ -8,14 +8,9 @@ from app.services.auth_service import authenticate_user, cambiar_password_usuari
 from app.api.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.password import PasswordChange
-from app.core.csrf import generar_csrf_token
+from app.core.csrf import generar_csrf_token, validar_csrf_token, CSRF_COOKIE_NAME
 from app.services.audit_service import audit_service
-
-from app.core.security import (
-    COOKIE_SECURE,
-    COOKIE_SAMESITE,
-    ACCESS_TOKEN_EXPIRE_MINUTES
-)
+from app.core.security import COOKIE_SECURE, COOKIE_SAMESITE,ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
@@ -92,7 +87,8 @@ def login(
     return {
         "usuario": resultado["usuario"],
         "correo": resultado["correo"],
-        "rol": resultado["rol"]
+        "rol": resultado["rol"],
+        "csrf_token": csrf_token
     }
 
 
@@ -158,6 +154,32 @@ def obtener_usuario_actual(
         "cambiar_password": usuario.cambiar_password
     }
 
+@router.get("/csrf")
+def obtener_token_csrf(
+    request: Request,
+    response: Response,
+    usuario: User = Depends(get_current_user)
+):
+    token_actual = request.cookies.get(CSRF_COOKIE_NAME)
+
+    if token_actual and validar_csrf_token(token_actual):
+        csrf_token = token_actual
+    else:
+        csrf_token = generar_csrf_token()
+
+    response.set_cookie(
+        key=CSRF_COOKIE_NAME,
+        value=csrf_token,
+        httponly=False,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        path="/"
+    )
+
+    return {
+        "csrf_token": csrf_token
+    }
 
 @router.post("/change-password")
 def cambiar_password(
@@ -207,7 +229,10 @@ def cambiar_password(
             path="/"
         )
 
-        return {"mensaje": "Contraseña actualizada correctamente"}
+        return {
+            "mensaje": "Contraseña actualizada correctamente",
+            "csrf_token": csrf_token
+        }
 
     except ValueError as error:
         raise HTTPException(
