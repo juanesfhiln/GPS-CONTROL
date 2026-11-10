@@ -91,11 +91,17 @@ Abre otra terminal desde la raíz del repositorio:
 
 ```powershell
 cd frontend
+Copy-Item .env.example .env.local
+```
+
+Edita `.env.local` y configura `VITE_API_URL` con la URL del backend. Para desarrollo local, utiliza `http://localhost:8000`; para otro entorno, utiliza la URL correspondiente. Después instala dependencias y ejecuta Vite:
+
+```powershell
 npm ci
 npm run dev
 ```
 
-Vite muestra la dirección local, normalmente `http://localhost:5173`. Esta dirección debe estar incluida en `FRONTEND_ORIGINS`. El frontend actualmente consume el backend desde `http://localhost:8000`, configurado directamente en `frontend/src/services/api.ts`.
+Vite muestra la dirección local, normalmente `http://localhost:5173`. Este origen debe estar incluido en `FRONTEND_ORIGINS` del backend. El archivo `.env.local` es local y no debe subirse al repositorio.
 
 ## 7. Ejecutar las pruebas
 
