@@ -15,7 +15,7 @@ Sistema web de gestión y monitoreo de flota vehicular, con integración de unid
 - Consulta de vehículos y detalle de unidad, con campos personalizados gestionados mediante Wialon.
 - Gestión de conductores, pasajeros y sus asignaciones a vehículos.
 - Dashboard con indicadores generales y mapa de vehículos.
-- Consulta del historial de viajes. **En esta versión, los recorridos del historial son simulados** y la API los identifica con `simulated: true`; no deben interpretarse como telemetría histórica real.
+- Consulta del historial de viajes mediante la integración con Wialon. La API obtiene los viajes y mensajes del intervalo consultado, transforma los datos para su visualización en mapa y reproducción, e identifica la respuesta con `simulated: false`.
 - Registro y consulta de auditoría para las operaciones contempladas por el backend.
 
 ## Requisitos
@@ -61,8 +61,8 @@ Los resultados de validación registrados para esta versión están en [`docs/IN
 - En producción, utilizar HTTPS y `COOKIE_SECURE=true`; revisar también `COOKIE_SAMESITE` según el dominio y la arquitectura de despliegue.
 - El frontend define actualmente `API_URL` como `http://localhost:8000` en `frontend/src/services/api.ts`. Para desplegar en otro host, debe ajustarse esa dirección o configurarse una estrategia de proxy compatible.
 - La integración de Wialon depende de credenciales y recursos válidos. La disponibilidad real de datos depende de la cuenta y permisos configurados en Wialon.
-- Los recorridos de viajes son simulados en esta versión.
+- El historial de viajes consulta datos de Wialon. La disponibilidad y cobertura dependen de los permisos, datos históricos y límites de mensajes de la cuenta configurada. Los intervalos con más de 10.000 mensajes deben reducirse; la paginación automática de intervalos todavía no está implementada.
 
 ## Estado de validación
 
-En la validación comunicada para esta versión se ejecutaron 203 pruebas del backend, todas aprobadas, y `npm run build` completó correctamente. El frontend genera una advertencia por un bundle JavaScript principal superior a 500 kB; no impide la compilación, pero se recomienda evaluar división de código antes de optimizar el despliegue.
+En la validación local comunicada más reciente se ejecutaron 208 pruebas del backend, todas aprobadas (0 fallidas), con una advertencia deprecada de Starlette/httpx. La compilación frontend registrada anteriormente completó correctamente; debe repetirse después de los últimos cambios para actualizar la evidencia de entrega. El frontend genera una advertencia por un bundle JavaScript principal superior a 500 kB; no impide la compilación, pero se recomienda evaluar división de código antes de optimizar el despliegue.
