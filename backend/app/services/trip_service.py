@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 import math
 
-from app.integrations.wialon_client import WialonClient
 from app.services.vehicle_service import vehicle_service
 
 
@@ -61,11 +60,16 @@ class TripService:
         # Si los índices no son utilizables, se filtra por tiempo. Esto evita
         # perder la geometría si la respuesta no conserva índices contiguos.
         if not candidatos:
-            candidatos = [
-                mensaje for mensaje in mensajes
-                if isinstance(mensaje, dict)
-                and inicio <= int(mensaje.get("t", -1) or -1) <= fin
-            ]
+            candidatos = []
+            for mensaje in mensajes:
+                if not isinstance(mensaje, dict):
+                    continue
+                try:
+                    timestamp = int(mensaje.get("t", -1) or -1)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+                if inicio <= timestamp <= fin:
+                    candidatos.append(mensaje)
 
         puntos = []
         for mensaje in candidatos:
@@ -89,9 +93,13 @@ class TripService:
             try:
                 latitud = float(ubicacion.get("y"))
                 longitud = float(ubicacion.get("x"))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
-            if not (-90 <= latitud <= 90 and -180 <= longitud <= 180):
+            if (
+                not math.isfinite(latitud)
+                or not math.isfinite(longitud)
+                or not (-90 <= latitud <= 90 and -180 <= longitud <= 180)
+            ):
                 continue
             if not any(
                 punto["elapsed_seconds"] == tiempo - inicio
