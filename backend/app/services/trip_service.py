@@ -8,7 +8,11 @@ from app.services.vehicle_service import vehicle_service
 class TripService:
 
     def __init__(self, wialon_client=None):
-        self.wialon_client = wialon_client or WialonClient()
+        # Reutiliza el cliente que inicializa y cierra el lifespan de FastAPI.
+        self.wialon_client = (
+            wialon_client if wialon_client is not None
+            else vehicle_service.wialon_client
+        )
 
     @staticmethod
     def _obtener_coordenada(mensaje):
