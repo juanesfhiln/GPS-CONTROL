@@ -46,7 +46,7 @@ La conexión PostgreSQL se construye con `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `D
 
 ## 6. Integración Wialon
 
-`WialonClient` usa `WIALON_API_URL` y `WIALON_TOKEN`, gestiona la sesión y realiza solicitudes asíncronas. `WialonMapper` transforma las respuestas de unidades al modelo de dominio. `VehicleService` mantiene una caché temporal de vehículos y la invalida cuando se modifican campos personalizados. `WIALON_RESOURCE_ID` identifica el recurso utilizado por los servicios que operan sobre conductores y pasajeros.
+`WialonClient` usa `WIALON_API_URL` y `WIALON_TOKEN`, gestiona la sesión y realiza solicitudes asíncronas. `WialonMapper` transforma las respuestas de unidades al modelo de dominio. `VehicleService` mantiene una caché temporal de vehículos y la invalida cuando se modifican campos personalizados. `TripService` reutiliza el cliente Wialon inicializado durante el ciclo de vida de FastAPI para consultar mensajes y viajes históricos. `WIALON_RESOURCE_ID` identifica el recurso utilizado por los servicios que operan sobre conductores y pasajeros.
 
 El cliente Wialon se inicia y cierra mediante el ciclo de vida de FastAPI. Por esta razón, la configuración Wialon debe estar presente incluso para arrancar el backend local.
 
@@ -67,9 +67,11 @@ Todos los endpoints funcionales se montan bajo `/api/v1`. Los routers definen, e
 
 La especificación interactiva puede consultarse en `/docs` mientras el backend está activo.
 
-## 8. Viajes simulados
+## 8. Historial de viajes Wialon
 
-`TripService` utiliza `TripMockProvider`, que construye recorridos y métricas de ejemplo. Tanto los registros como la respuesta del historial llevan el indicador `simulated: true`. La integración de viajes con telemetría real no está implementada en esta versión.
+`TripService` consulta el historial mediante `WialonClient.get_unit_trips`. El cliente descarga los mensajes del intervalo con `messages/load_interval` y solicita los viajes calculados por Wialon mediante `unit/get_trips`. Antes de cargar otro intervalo ejecuta `messages/unload`, y protege la secuencia de carga/consulta con un bloqueo para evitar solapamientos del almacén de mensajes de la sesión.
+
+`TripService` transforma los tiempos, distancias, posiciones y mensajes en el DTO de viajes que consume el frontend. La respuesta y cada viaje se identifican con `simulated: false`. Si Wialon informa más mensajes que los devueltos, el servicio rechaza la consulta e indica reducir el rango. El límite configurado es de 10.000 mensajes por intervalo; no se implementó paginación automática. La disponibilidad del historial depende de los datos y permisos de la cuenta Wialon.
 
 ## 9. Consideraciones de despliegue
 
