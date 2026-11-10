@@ -26,7 +26,7 @@
 - [ ] Repetir el build del frontend y registrar la salida.
 - [ ] Guardar evidencias visuales de los módulos y del historial RF-24.
 - [ ] Probar instalación limpia siguiendo `docs/INSTALACION.md` en un entorno separado.
-- [ ] Revisar configuración de despliegue y confirmar que el frontend utiliza la URL correcta de API en producción.
+- [x] Configuración de despliegue: `VITE_API_URL` verificada en Netlify y `FRONTEND_ORIGINS` corregida en Render con el origen HTTPS; despliegue publicado y validación funcional de producción confirmada por el usuario.
 - [ ] Preparar commit final de entrega y verificar el push a `origin/main`.
 
 ## Observaciones técnicas conocidas
