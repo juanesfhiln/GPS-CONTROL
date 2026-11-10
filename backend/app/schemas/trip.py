@@ -26,7 +26,7 @@ class TripResponse(BaseModel):
     average_speed: float
     max_speed: float
     route_points: list[TripRoutePoint]
-    simulated: bool = True
+    simulated: bool = False
 
 
 class TripHistoryResponse(BaseModel):
